@@ -34,11 +34,11 @@ handleInput :: HasEnv => World -> IO ()
 handleInput w = openEnv $ \Env{..} -> do
   --ctx <- Jfxr.newAudioContext
   --clip <- Jfxr.newClip jfxrStr
-  bindKeyDir w Playing "KeyS" DOWN
-  bindKeyDir w Playing "KeyW" UP
-  bindKeyDir w Playing "KeyA" LEFT
-  bindKeyDir w Playing "KeyD" RIGHT
-  bindKey w Dead "Enter" $ do
+  bindKeyDir w Playing ["KeyS", "ArrowDown"] DOWN
+  bindKeyDir w Playing ["KeyW", "ArrowUp"] UP
+  bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
+  bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
+  bindKey w Dead ["Enter"] $ do
     updateScore (const (Score 0))
     cleanupSnake
     cleanupFood
@@ -49,19 +49,19 @@ handleInput w = openEnv $ \Env{..} -> do
                                                          consoleLogShow "PLAY"
                                                          consoleLogVal (coerce clip)
                                                          Jfxr.playClip ctx clip)-}
-bindKey :: World -> Screen -> String -> System World () ->IO ()
-bindKey w screen keycode sys =
-  addWindowEventListener "keydown" =<< jsFuncFromHs_ (runWith w . gateKeypress keycode (gateScreen screen sys))
+bindKey :: World -> Screen -> [String] -> System World () ->IO ()
+bindKey w screen keycodes sys =
+  addWindowEventListener "keydown" =<< jsFuncFromHs_ (runWith w . gateKeypress keycodes (gateScreen screen sys))
 
-bindKeyDir :: World -> Screen -> String -> Dir -> IO ()
-bindKeyDir w screen keycode dir = bindKey w screen keycode (setCurrentDir dir)
+bindKeyDir :: World -> Screen -> [String] -> Dir -> IO ()
+bindKeyDir w screen keycodes dir = bindKey w screen keycodes (setCurrentDir dir)
 
-gateKeypress :: MonadIO m => String -> m () -> JSVal -> m ()
-gateKeypress expectedCode k e = do
+gateKeypress :: MonadIO m => [String] -> m () -> JSVal -> m ()
+gateKeypress expectedCodes k e = do
   krepeat <- valAsBool <$> liftIO (getProperty "repeat" e)
   unless krepeat $ do
     kcode <- fromJSString . valAsString <$> liftIO (getProperty "code" e)
-    when (kcode == expectedCode) $ do
+    when (kcode `elem` expectedCodes) $ do
       k
 
 setCurrentDir :: Dir -> System World ()
