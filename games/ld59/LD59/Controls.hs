@@ -38,6 +38,8 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKeyDir w Playing ["KeyW", "ArrowUp"] UP
   bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
   bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
+  bindKey w Playing ["Space"] $ do
+    cmap $ \(s::Snake, Not :: Not Scrambling) -> Scrambling 3
   bindKey w Dead ["Enter"] $ do
     updateScore (const (Score 0))
     cleanupSnake

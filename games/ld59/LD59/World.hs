@@ -50,6 +50,12 @@ data Food = Food
 
 instance Component Food where type Storage Food = Map Food
 
+newtype Scrambling = Scrambling Word64
+  deriving stock (Show)
+  deriving newtype (Enum, Bounded, Num)
+
+instance Component Scrambling where type Storage Scrambling = Unique Scrambling
+
 newtype Frame = Frame Word64
   deriving stock (Show)
   deriving newtype (Enum, Bounded, Num)
@@ -65,4 +71,4 @@ newtype Score = Score { rawScore :: Word64 }
 instance Component Score where type Storage Score = Global Score
 
 
-makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score]
+makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling]

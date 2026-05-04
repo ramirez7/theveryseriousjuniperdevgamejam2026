@@ -1,4 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 module LD59.Tick where
 
 import Apecs
@@ -32,6 +34,12 @@ snakeRate = Rate 20 0
 
 tailAnimRate :: Rate
 tailAnimRate = Rate 10 0
+
+scrambleAnimRate :: Rate
+scrambleAnimRate = Rate 5 0
+
+scrambleTickDegrees :: Int
+scrambleTickDegrees = 30
 
 spawnRate :: Rate
 spawnRate = Rate (5 * 60) 27
@@ -74,6 +82,14 @@ animTail = everyFrame tailAnimRate $ do
   cmapM_ $ \(s::Snake) ->
     for_ (snakeTail s) $ \Tail{..} -> liftIO $ mirrorFlipSpriteH tailSprite
 
+animScramble :: System World ()
+animScramble = everyFrame scrambleAnimRate $ do
+  cmapM_ $ uncurry $ \(s::Snake) -> \case
+    Nothing -> for_ (snakeHead s) $ \Head{..} -> liftIO $ setProperty "angle" headSprite (intAsVal 0)
+    Just (Scrambling{}) -> for_ (snakeHead s) $ \Head{..} -> liftIO $ do
+      d <- valAsInt <$> getProperty "angle" headSprite
+      setProperty "angle" headSprite (intAsVal $ d + scrambleTickDegrees)
+
 foodPoints :: Score
 foodPoints = 10
 
@@ -105,7 +121,9 @@ tickSnake = everyFrame snakeRate $ do
     let oob = hx < 0 || hy < 0 || hx > worldBounds ^. _x || hy > worldBounds ^. _y
     let onTail = snakeHeadPos snakeHead `elem` snakeLocateTail s
     when (oob || onTail) $ cmap $ \(_::Screen) -> Dead
-
+  cmap $ \case
+    Scrambling 0 -> Nothing
+    Scrambling n -> Just $ Scrambling $ pred n
 randomFromList :: MonadIO m => [a] -> m a
 randomFromList [] = error "randomFromList ERROR: empty list"
 randomFromList xs = do
