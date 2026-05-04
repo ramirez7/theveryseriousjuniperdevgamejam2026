@@ -107,6 +107,7 @@ library ld59-lib
     LD59.Init
     LD59.Jfxr.JSFFI
     LD59.Jfxr.Types
+    LD59.Score
     LD59.Screen
     LD59.Snake
     LD59.Tick

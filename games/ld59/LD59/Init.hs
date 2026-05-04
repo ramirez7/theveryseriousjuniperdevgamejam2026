@@ -95,3 +95,10 @@ cleanupFood = cmapM $ \Food{..} -> do
   liftIO $ destroySprite (tailSprite foodStuff)
   pure (Nothing :: Maybe Food)
   
+initScoreText :: Pixi.Application -> IO Pixi.Text
+initScoreText app = do
+  txt <- newText "0" "red"
+  setProperty "x" txt (intAsVal $ gameWidth `div` 2)
+  setProperty "y" txt (intAsVal $ 0)
+  addChild app txt
+  pure txt

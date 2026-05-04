@@ -39,7 +39,8 @@ main = do
     appendCanvas x'
     pure x'
   pa <- initPlayArea app
-  withEnv (Env art ac app pa) $ do
+  scoreTxt <- initScoreText app
+  withEnv (Env art ac app pa scoreTxt) $ do
     setScalingNearestNeighbor
     --appendToTarget "#canvas-container" app
     screen <- getProperty "screen" app
@@ -56,7 +57,10 @@ main = do
     runWith w $ do
       initBG
       initBorder
-      liftIO $ addChild app pa
+      liftIO $ do
+        -- foreground some stuff
+        addChild app scoreTxt
+        addChild app pa
       initGame
       syncSnakeArt
     

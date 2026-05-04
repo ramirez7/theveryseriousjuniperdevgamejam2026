@@ -16,6 +16,7 @@ import Data.Set qualified as Set
 import Pixi.Types qualified as Pixi
 import Control.Monad.IO.Class
 import LD59.Env
+import LD59.Score
 
 tickFrame :: System World ()
 tickFrame = modify global (succ @Frame)
@@ -71,7 +72,10 @@ animTail = everyFrame tailAnimRate $ do
   cmapM_ $ \(s::Snake) ->
     for_ (snakeTail s) $ \Tail{..} -> liftIO $ mirrorFlipSpriteH tailSprite
 
-tickSnake :: System World ()
+foodPoints :: Score
+foodPoints = 10
+
+tickSnake :: HasEnv => System World ()
 tickSnake = everyFrame snakeRate $ do
   cmap $ \(CurrentDir dir, s::Snake) -> snakeMove dir s
   -- Check for match
@@ -79,14 +83,15 @@ tickSnake = everyFrame snakeRate $ do
   -- is visible.
   cmapM $ \(s::Snake) -> do
     let (newSnake, match) = snakeMatch tailWave s
-    for_ match $ \(t, _) ->
+    for_ match $ \(t, _) -> do
+      updateScore (+ (sum $ fmap (const foodPoints) t))
       cleanupSnakeTail t
     pure newSnake
   -- Check for eat
   cmapM_ $ \(Food{..}, foodEty) -> 
     cmapM_ $ \(s@Snake{..}::Snake, snakeEty) ->
       when (snakeHeadPos snakeHead == foodPos) $ do
-        liftIO $ consoleLogShow ("EAT"::String)
+        updateScore (+ foodPoints)
         Apecs.set snakeEty $ snakeEat id foodStuff s
         destroy foodEty (Proxy @Food)
   -- Check for death (tail or edge)

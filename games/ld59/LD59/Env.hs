@@ -14,6 +14,7 @@ data Env = Env
   , envAudio :: Jfxr.AudioContext
   , envApp :: Pixi.Application
   , envPlayArea :: Pixi.Container
+  , envScore :: Pixi.Text
   }
 
 type HasEnv = (?env :: Env)
@@ -41,3 +42,4 @@ playAreaWidth, playAreaHeight :: Int
 
 addPlayAreaChild :: MonadIO m => IsJSVal a => HasEnv => a -> m ()
 addPlayAreaChild x = openEnv $ \Env{..} -> liftIO $ addContainerChild envPlayArea x
+

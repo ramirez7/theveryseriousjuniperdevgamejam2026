@@ -55,5 +55,12 @@ newtype Frame = Frame Word64
 
 instance Component Frame where type Storage Frame = Global Frame
 
+newtype Score = Score { rawScore :: Word64 }
+  deriving stock (Show)
+  deriving newtype (Enum, Bounded, Num)
+  deriving (Semigroup, Monoid) via (Sum Score)
 
-makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border]
+instance Component Score where type Storage Score = Global Score
+
+
+makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score]

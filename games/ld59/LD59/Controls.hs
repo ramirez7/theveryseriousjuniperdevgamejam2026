@@ -22,6 +22,7 @@ import LD59.Draw
 import LD59.Wave
 import LD59.Init
 import LD59.Env
+import LD59.Score
 
 jfxrStr :: JSString
 jfxrStr = toJSString """
@@ -37,6 +38,7 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKeyDir w Playing "KeyA" LEFT
   bindKeyDir w Playing "KeyD" RIGHT
   bindKey w Dead "Enter" $ do
+    updateScore (const (Score 0))
     cleanupSnake
     cleanupFood
     --liftIO $ Jfxr.newClip ((artSinJfxr envArt) { jfxrWaveform = waveToJfxr SAW }) >>= Jfxr.playClip envAudio
