@@ -8,6 +8,7 @@ import LD59.Dir
 import LD59.Draw
 import Pixi.Types qualified as Pixi
 import Apecs
+import LD59.Buffer
 import Lib
 import Linear.V2
 import Data.Foldable (for_)
@@ -47,7 +48,7 @@ initGame = openEnv $ \Env{..} -> do
         , snakeTail = SnakeTail hardcodedTail
         , snakeStomachDir = RIGHT
         }
-  newEntity_ (CurrentDir RIGHT, initSnake)
+  newEntity_ (CurrentDir $ Buffer [], initSnake)
   newEntity_ Dead
   newFood TRI (V2 8 8)
 

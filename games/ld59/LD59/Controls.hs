@@ -6,6 +6,7 @@
 module LD59.Controls where
 
 import LD59.World
+import LD59.Buffer
 import LD59.Art
 import GHC.Wasm.Prim
 import LD59.Dir
@@ -62,6 +63,6 @@ gateKeypress expectedCode k e = do
     kcode <- fromJSString . valAsString <$> liftIO (getProperty "code" e)
     when (kcode == expectedCode) $ do
       k
-  
+
 setCurrentDir :: Dir -> System World ()
-setCurrentDir dir = cmap $ \(CurrentDir _) -> CurrentDir dir
+setCurrentDir dir = cmap $ \(CurrentDir b) -> CurrentDir (buffer dir b)

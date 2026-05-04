@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE DerivingStrategies #-}
@@ -13,6 +14,7 @@ import LD59.Dir
 import Data.Monoid (Sum (..), First (..))
 import Linear.V2
 import LD59.Wave
+import LD59.Buffer
 
 data Screen = Title | Playing | Dead deriving stock (Show, Eq)
 
@@ -28,7 +30,7 @@ newtype Border = Border { borderSprites :: [Pixi.Sprite] }
 
 instance Component Border where type Storage Border = Global Border
 
-newtype CurrentDir = CurrentDir Dir deriving stock (Show)
+newtype CurrentDir = CurrentDir (Buffer 3 Dir) deriving stock (Show)
 instance Component CurrentDir where type Storage CurrentDir = Unique CurrentDir
 
 data Head = Head

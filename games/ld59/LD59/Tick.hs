@@ -9,6 +9,8 @@ import Control.Monad (when)
 import Control.Lens
 import LD59.Draw
 import LD59.Init
+import LD59.Buffer
+import Data.Maybe (fromMaybe)
 import Linear.V2
 import Data.Foldable (for_)
 import Lib
@@ -77,7 +79,10 @@ foodPoints = 10
 
 tickSnake :: HasEnv => System World ()
 tickSnake = everyFrame snakeRate $ do
-  cmap $ \(CurrentDir dir, s::Snake) -> snakeMove dir s
+  cmap $ \(CurrentDir b, s::Snake) ->
+    let (mDir, b') = unbuffer b
+        dir = fromMaybe (snakeHeadDir $ snakeHead s) mDir
+    in (snakeMove dir s, CurrentDir b')
   -- Check for match
   -- We do it _before_ eating, so for one tick the match
   -- is visible.
