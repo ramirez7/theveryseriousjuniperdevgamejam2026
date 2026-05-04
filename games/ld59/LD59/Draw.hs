@@ -68,6 +68,9 @@ centerAnchorSprite s = do
 setSpriteTexture :: Pixi.Sprite -> Pixi.Texture -> IO ()
 setSpriteTexture s t = setProperty "texture" s t
 
+rotateSprite :: Pixi.Sprite -> Float -> IO ()
+rotateSprite s a = setProperty "rotation" s (floatAsVal a)
+
 syncSnakeArt :: HasEnv => System World ()
 syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> liftIO $ do
   for_ snakeHead $ \Head{..} -> do
@@ -79,5 +82,8 @@ syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> liftIO 
     runKleisli headMirror headSprite
     setSpriteTexture headSprite headTex
     setSpritePos headSprite (snakeHeadPos snakeHead)
-  for_ (snakeLocateTail s `zip` toList snakeTail) $ \(tailPos, Tail{..}) -> setSpritePos tailSprite tailPos
+  for_ (snakeLocateTail s `zip` snakeTailSegs snakeTail) $ \(tailPos, SnakeTailSeg{..}) -> do
+    let Tail{..} = snakeTailVal
+    rotateSprite tailSprite (unangle $ fmap fromIntegral $ dirV2 $ snakeTailDir)
+    setSpritePos tailSprite tailPos
     

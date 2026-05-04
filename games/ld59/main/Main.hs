@@ -58,6 +58,7 @@ main = do
       initBorder
       liftIO $ addChild app pa
       initGame
+      syncSnakeArt
     
     callAddTicker gameTicker =<< jsFuncFromHs_
       (\_ -> runWith w $ do
@@ -66,7 +67,7 @@ main = do
             tickSnake
             tickFoodSpawn
             animTail
-          syncSnakeArt
+            syncSnakeArt
           )
     
     handleInput w

@@ -39,7 +39,7 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKey w Dead "Enter" $ do
     cleanupSnake
     cleanupFood
-    liftIO $ Jfxr.newClip ((artSinJfxr envArt) { jfxrWaveform = waveToJfxr SAW }) >>= Jfxr.playClip envAudio
+    --liftIO $ Jfxr.newClip ((artSinJfxr envArt) { jfxrWaveform = waveToJfxr SAW }) >>= Jfxr.playClip envAudio
     initGame
     cmap $ \(_::Screen) -> Playing
 {-  addWindowEventListener "keydown" =<< jsFuncFromHs_ (\_ -> do

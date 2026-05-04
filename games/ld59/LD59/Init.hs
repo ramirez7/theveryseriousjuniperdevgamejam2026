@@ -49,7 +49,7 @@ initGame = openEnv $ \Env{..} -> do
         }
   newEntity_ (CurrentDir RIGHT, initSnake)
   newEntity_ Dead
-  newFood TRI (V2 10 10)
+  newFood TRI (V2 8 8)
 
 initBG :: HasEnv => System World ()
 initBG = openEnv $ \Env{..} -> do
@@ -82,9 +82,10 @@ initPlayArea app = do
   pure c
 
 cleanupSnake :: System World ()
-cleanupSnake = cmapM_ $ \(Snake{..}::Snake) -> do
+cleanupSnake = cmapM $ \(Snake{..}::Snake) -> do
   liftIO $ for_ snakeHead  $ \Head{..} -> destroySprite headSprite
   cleanupSnakeTail snakeTail
+  pure (Nothing :: Maybe Snake)
 
 cleanupSnakeTail :: SnakeTail Tail -> System World ()
 cleanupSnakeTail st = liftIO $ for_ st $ \Tail{..} -> destroySprite tailSprite
