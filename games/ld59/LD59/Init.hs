@@ -16,7 +16,7 @@ import LD59.Wave
 import Data.Traversable (for)
 import LD59.Env
 import LD59.Art
-
+import LD59.Random
 
 newFood :: HasEnv => Wave -> V2 Int -> System World ()
 newFood tailWave p = openEnv $ \Env{..} -> do
@@ -32,7 +32,8 @@ initGame = openEnv $ \Env{..} -> do
   liftIO $ do
     centerAnchorSprite headSprite
     addPlayAreaChild headSprite
-  hardcodedTail <- for [minBound..] $ \tailWave -> do
+  initialTail <- shuffleList [minBound..maxBound]
+  hardcodedTail <- for initialTail $ \tailWave -> do
     tailSprite <- liftIO $ newSprite (waveSpriteArt envArt tailWave)
     liftIO $ centerAnchorSprite tailSprite
     liftIO $ addPlayAreaChild tailSprite
@@ -50,7 +51,7 @@ initGame = openEnv $ \Env{..} -> do
         }
   newEntity_ (CurrentDir $ Buffer [], initSnake)
   newEntity_ Dead
-  newFood TRI (V2 8 8)
+  newFood (last initialTail) (V2 8 8)
 
 initBG :: HasEnv => System World ()
 initBG = openEnv $ \Env{..} -> do

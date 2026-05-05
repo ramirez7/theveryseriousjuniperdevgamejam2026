@@ -12,6 +12,7 @@ import Control.Lens
 import LD59.Draw
 import LD59.Init
 import LD59.Wave
+import LD59.Random
 import Data.Foldable (traverse_)
 import LD59.Buffer
 import Data.Maybe (fromMaybe)
@@ -20,7 +21,6 @@ import Data.Foldable (for_)
 import Lib
 import Data.Set qualified as Set
 import Pixi.Types qualified as Pixi
-import Control.Monad.IO.Class
 import LD59.Env
 import LD59.Score
 import Data.Tuple.Extra (uncurry3)
@@ -141,19 +141,3 @@ tickSnake = everyFrame snakeRate $ do
     Scrambling 0 -> Nothing
     Scrambling n -> Just $ Scrambling $ pred n
 
-randomFromList :: MonadIO m => [a] -> m a
-randomFromList = fmap fst . randomIdxFromList
-
-randomNFromList :: MonadIO m => Int -> [a] -> m [a]
-randomNFromList 0 _ = pure []
-randomNFromList _ [] = pure []
-randomNFromList n xs = do
-  (a, i) <- randomIdxFromList xs
-  let xs' = filter (\(_, j) -> i /= j) (xs `zip` [0..])
-  (a :) <$> randomNFromList (n - 1) (fmap fst xs')
-
-randomIdxFromList :: MonadIO m => [a] -> m (a, Int)
-randomIdxFromList [] = error "randomFromList ERROR: empty list"
-randomIdxFromList xs = do
-  n <- liftIO jsRandom
-  pure $ (xs `zip` [0..]) !! floor (fromIntegral (length xs) * n)
