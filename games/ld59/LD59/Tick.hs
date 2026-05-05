@@ -11,6 +11,8 @@ import Control.Monad (when)
 import Control.Lens
 import LD59.Draw
 import LD59.Init
+import LD59.Wave
+import Data.Foldable (traverse_)
 import LD59.Buffer
 import Data.Maybe (fromMaybe)
 import Linear.V2
@@ -21,6 +23,7 @@ import Pixi.Types qualified as Pixi
 import Control.Monad.IO.Class
 import LD59.Env
 import LD59.Score
+import Data.Tuple.Extra (uncurry3)
 
 tickFrame :: System World ()
 tickFrame = modify global (succ @Frame)
@@ -68,14 +71,21 @@ cfoldMap
   -> SystemT w m a
 cfoldMap f = cfold (\acc c -> mappend acc (f c)) mempty
 
-tickFoodSpawn :: HasEnv => System World ()
-tickFoodSpawn = everyFrame spawnRate $ do
+listOpenCoords :: System World [V2 Int]
+listOpenCoords = do
   snakeCoords <- cfoldMap $ \(s@Snake{..}::Snake) -> Set.fromList (snakeHeadPos snakeHead : snakeLocateTail s)
   foodCoords <- cfoldMap $ \Food{..} -> Set.singleton foodPos
   let occupiedCoords = mconcat [snakeCoords, foodCoords]
-  let openCoords = filter (flip Set.notMember occupiedCoords) worldCoords
-  wave <- randomFromList [minBound]
-  randomFromList openCoords >>= newFood wave
+  pure $ filter (flip Set.notMember occupiedCoords) worldCoords  
+
+newRandomFood :: HasEnv => [Wave] ->V2 Int -> System World ()
+newRandomFood waves p = do
+  wave <- randomFromList waves
+  newFood wave p
+
+tickFoodSpawn :: HasEnv => System World ()
+tickFoodSpawn = everyFrame spawnRate $
+  listOpenCoords >>= randomFromList >>= newRandomFood [minBound..maxBound]
 
 animTail :: System World ()
 animTail = everyFrame tailAnimRate $ do
@@ -110,10 +120,16 @@ tickSnake = everyFrame snakeRate $ do
     pure newSnake
   -- Check for eat
   cmapM_ $ \(Food{..}, foodEty) -> 
-    cmapM_ $ \(s@Snake{..}::Snake, snakeEty) ->
-      when (snakeHeadPos snakeHead == foodPos) $ do
-        updateScore (+ foodPoints)
-        Apecs.set snakeEty $ snakeEat id foodStuff s
+    cmapM_ $ uncurry3 $ \(s@Snake{..}::Snake) -> \snakeEty -> \case
+      Nothing -> do
+        when (snakeHeadPos snakeHead == foodPos) $ do
+          updateScore (+ foodPoints)
+          Apecs.set snakeEty $ snakeEat id foodStuff s
+          destroy foodEty (Proxy @Food)
+      Just Scrambling{} -> when (snakeHeadPos snakeHead == foodPos) $ do
+        let ws = filter (/= tailWave foodStuff) [minBound..maxBound]
+        listOpenCoords >>= randomNFromList 2 >>= traverse_ (newRandomFood ws)
+        liftIO $ destroySprite (tailSprite foodStuff)
         destroy foodEty (Proxy @Food)
   -- Check for death (tail or edge)
   cmapM_ $ \(s@Snake{..}::Snake) -> do
@@ -124,8 +140,20 @@ tickSnake = everyFrame snakeRate $ do
   cmap $ \case
     Scrambling 0 -> Nothing
     Scrambling n -> Just $ Scrambling $ pred n
+
 randomFromList :: MonadIO m => [a] -> m a
-randomFromList [] = error "randomFromList ERROR: empty list"
-randomFromList xs = do
+randomFromList = fmap fst . randomIdxFromList
+
+randomNFromList :: MonadIO m => Int -> [a] -> m [a]
+randomNFromList 0 _ = pure []
+randomNFromList _ [] = pure []
+randomNFromList n xs = do
+  (a, i) <- randomIdxFromList xs
+  let xs' = filter (\(_, j) -> i /= j) (xs `zip` [0..])
+  (a :) <$> randomNFromList (n - 1) (fmap fst xs')
+
+randomIdxFromList :: MonadIO m => [a] -> m (a, Int)
+randomIdxFromList [] = error "randomFromList ERROR: empty list"
+randomIdxFromList xs = do
   n <- liftIO jsRandom
-  pure $ xs !! floor (fromIntegral (length xs) * n)
+  pure $ (xs `zip` [0..]) !! floor (fromIntegral (length xs) * n)
