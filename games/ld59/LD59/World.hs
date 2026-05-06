@@ -70,5 +70,4 @@ newtype Score = Score { rawScore :: Word64 }
 
 instance Component Score where type Storage Score = Global Score
 
-
 makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling]
