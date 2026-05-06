@@ -24,28 +24,10 @@ import Pixi.Types qualified as Pixi
 import LD59.Env
 import LD59.Score
 import Data.Tuple.Extra (uncurry3)
+import LD59.Rate
 
 tickFrame :: System World ()
 tickFrame = modify global (succ @Frame)
-
-data Rate = Rate
-  { ratePeriod :: Word64
-  , rateOffset :: Word64
-  }
-snakeRate :: Rate
-snakeRate = Rate 20 0
-
-tailAnimRate :: Rate
-tailAnimRate = Rate 10 0
-
-scrambleAnimRate :: Rate
-scrambleAnimRate = Rate 5 0
-
-scrambleTickDegrees :: Int
-scrambleTickDegrees = 30
-
-spawnRate :: Rate
-spawnRate = Rate (5 * 60) 27
 
 worldBounds :: V2 Int
 worldBounds = tileDims - pure 3 -- border + 1
@@ -56,11 +38,6 @@ worldCoords = do
   x <- [0..wxb]
   y <- [0..wyb]
   [V2 x y]
-
-everyFrame :: Rate -> System World () -> System World ()
-everyFrame Rate{..} k = do
-  Frame frame <- get global
-  when (frame `mod` ratePeriod == rateOffset) k
 
 cfoldMap
   :: forall c w a m

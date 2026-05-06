@@ -9,11 +9,12 @@ import Lib
 import Pixi.Types qualified as Pixi
 import LD59.World
 import LD59.Snake
+import LD59.Rate
 import Data.Foldable
 import Apecs
 import Control.Lens
 import Linear.V2
-import Linear.Vector ((^*))
+import Linear.Vector ((^*), (*^))
 import LD59.Wave
 import LD59.Jfxr.Types
 import LD59.Jfxr.JSFFI
@@ -24,19 +25,28 @@ import LD59.Art
 import LD59.Env
 import LD59.Dir
 import Control.Arrow (Kleisli (..))
+import LD59.Buffer
+import Data.Maybe (fromMaybe)
 
 test :: System World ()
 test = cmapM_ $ \CurrentDir{} -> pure ()
 
 setSpritePos :: Pixi.Sprite -> V2 Int -> IO ()
-setSpritePos s v2 = do
+setSpritePos s p = setSpritePosOffset s p (V2 0 0)
+
+setSpritePosOffset :: Pixi.Sprite -> V2 Int -> V2 Float -> IO ()
+setSpritePosOffset s v2 offset = do
   let v2Screen = v2 ^* tileSize
   xAnchor <- valAsFloat <$> getPropertyKey ["anchor", "x"] s
   yAnchor <- valAsFloat <$> getPropertyKey ["anchor", "y"] s
-  let xOff = round ((fromIntegral tileSize) * xAnchor)
-  let yOff = round ((fromIntegral tileSize) * yAnchor)
-  setProperty "x" s (intAsVal $ (v2Screen ^. _x) + xOff)
-  setProperty "y" s (intAsVal $ (v2Screen ^. _y) + yOff)
+  let xTileOff = round ((fromIntegral tileSize) * xAnchor)
+  let yTileOff = round ((fromIntegral tileSize) * yAnchor)
+  let tileOff = fmap fromIntegral (V2 xTileOff yTileOff)
+  let scaledOffset = offset ^* (fromIntegral tileSize)
+  let fullOff = tileOff + scaledOffset
+  let (V2 screenX screenY) = (fmap fromIntegral v2Screen) + fullOff
+  setProperty "x" s (floatAsVal screenX)
+  setProperty "y" s (floatAsVal screenY)
 
 unmirrorSpriteV :: Pixi.Sprite -> IO ()
 unmirrorSpriteV s = setPropertyKey ["scale", "y"] s (intAsVal 1)
@@ -72,7 +82,10 @@ rotateSprite :: Pixi.Sprite -> Float -> IO ()
 rotateSprite s a = setProperty "rotation" s (floatAsVal a)
 
 syncSnakeArt :: HasEnv => System World ()
-syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> liftIO $ do
+syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake, f::Frame, CurrentDir b) -> liftIO $ do
+  -- peek ahead into the input buffer here? the easing is weird due to that
+  let nextDir = fromMaybe (snakeHeadDir snakeHead) (peekbuffer b)
+  let nextSnake@Snake{snakeTail=nextTail} = snakeMove nextDir s
   for_ snakeHead $ \Head{..} -> do
     let (headTex, headMirror) = case snakeHeadDir snakeHead of
           UP -> (artHeadUp envArt, traverse_ Kleisli [unmirrorSpriteV, unmirrorSpriteH])
@@ -81,9 +94,9 @@ syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> liftIO 
           RIGHT -> (artHeadSide envArt, traverse_ Kleisli [mirrorSpriteH, unmirrorSpriteV])
     runKleisli headMirror headSprite
     setSpriteTexture headSprite headTex
-    setSpritePos headSprite (snakeHeadPos snakeHead)
-  for_ (snakeLocateTail s `zip` snakeTailSegs snakeTail) $ \(tailPos, SnakeTailSeg{..}) -> do
+    setSpritePosOffset headSprite (snakeHeadPos snakeHead) (rateTween f snakeRate *^ dirV2f nextDir)
+  for_ (snakeLocateTail s `zip` snakeTailSegs nextTail) $ \(tailPos, SnakeTailSeg{..}) -> do
     let Tail{..} = snakeTailVal
-    rotateSprite tailSprite (unangle $ fmap fromIntegral $ dirV2 $ snakeTailDir)
-    setSpritePos tailSprite tailPos
+    rotateSprite tailSprite (unangle $ dirV2f snakeTailDir)
+    setSpritePosOffset tailSprite tailPos (rateTween f snakeRate *^ dirV2f snakeTailDir)
     

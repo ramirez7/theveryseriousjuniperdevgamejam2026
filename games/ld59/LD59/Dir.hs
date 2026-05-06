@@ -22,3 +22,5 @@ dirV2 = \case
   LEFT -> V2 -1 0
   RIGHT -> V2 1 0
 
+dirV2f :: Dir -> V2 Float
+dirV2f = fmap fromIntegral . dirV2
