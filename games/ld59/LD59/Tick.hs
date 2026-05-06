@@ -6,7 +6,6 @@ module LD59.Tick where
 import Apecs
 import LD59.World
 import LD59.Snake
-import Data.Word
 import Control.Monad (when)
 import Control.Lens
 import LD59.Draw
@@ -15,7 +14,6 @@ import LD59.Wave
 import LD59.Random
 import Data.Foldable (traverse_)
 import LD59.Buffer
-import Data.Maybe (fromMaybe)
 import Linear.V2
 import Data.Foldable (for_)
 import Lib
@@ -25,6 +23,7 @@ import LD59.Env
 import LD59.Score
 import Data.Tuple.Extra (uncurry3)
 import LD59.Rate
+import LD59.Level
 
 tickFrame :: System World ()
 tickFrame = modify global (succ @Frame)
@@ -81,7 +80,7 @@ foodPoints :: Score
 foodPoints = 10
 
 tickSnake :: HasEnv => System World ()
-tickSnake = everyFrame snakeRate $ do
+tickSnake = everyFrameM (fmap snakeLevelRate snakeLevel) $ do
   cmap $ \(CurrentDir b, s::Snake) ->
     let (mDir, b') = unbuffer b
         dir = maybe (snakeHeadDir $ snakeHead s) id mDir

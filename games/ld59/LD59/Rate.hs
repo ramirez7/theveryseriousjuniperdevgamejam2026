@@ -9,7 +9,7 @@ import Apecs
 data Rate = Rate
   { ratePeriod :: Word64
   , rateOffset :: Word64
-  }
+  } deriving Show
 
 snakeRate :: Rate
 snakeRate = Rate 24 0
