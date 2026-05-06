@@ -67,4 +67,6 @@ gateKeypress expectedCodes k e = do
       k
 
 setCurrentDir :: Dir -> System World ()
-setCurrentDir dir = cmap $ \(CurrentDir b) -> CurrentDir (buffer dir b)
+setCurrentDir dir = cmapM $ \(CurrentDir b) -> do
+  f <- Apecs.get global
+  pure $ CurrentDir (buffer (DirInput dir f) b)

@@ -84,10 +84,10 @@ rotateSprite s a = setProperty "rotation" s (floatAsVal a)
 syncSnakeArt :: HasEnv => System World ()
 syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake, f::Frame, CurrentDir b) -> liftIO $ do
   -- peek ahead into the input buffer here? the easing is weird due to that
-  let nextDir = fromMaybe (snakeHeadDir snakeHead) (peekbuffer b)
+  let nextDir = maybe (snakeHeadDir snakeHead) inputDir (peekbuffer b)
   let nextSnake@Snake{snakeTail=nextTail} = snakeMove nextDir s
   for_ snakeHead $ \Head{..} -> do
-    let (headTex, headMirror) = case snakeHeadDir snakeHead of
+    let (headTex, headMirror) = case nextDir of
           UP -> (artHeadUp envArt, traverse_ Kleisli [unmirrorSpriteV, unmirrorSpriteH])
           DOWN -> (artHeadUp envArt, traverse_ Kleisli [mirrorSpriteV, unmirrorSpriteH])
           LEFT -> (artHeadSide envArt, traverse_ Kleisli [unmirrorSpriteH, unmirrorSpriteV])

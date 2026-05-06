@@ -21,6 +21,11 @@ unbuffer = \case
   Buffer [] -> (Nothing, Buffer [])
   Buffer (x:xs) -> (Just x, Buffer xs)
 
+unbufferWhen :: forall n a. KnownNat n => (a -> Bool) -> Buffer n a -> (Maybe a, Buffer n a)
+unbufferWhen p = \case
+  Buffer [] -> (Nothing, Buffer [])
+  Buffer (x:xs) | p x -> (Just x, Buffer xs)
+  Buffer xs -> (Nothing, Buffer xs)
 peekbuffer :: Buffer n a -> Maybe a
 peekbuffer = \case
   Buffer [] -> Nothing

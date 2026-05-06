@@ -30,7 +30,11 @@ newtype Border = Border { borderSprites :: [Pixi.Sprite] }
 
 instance Component Border where type Storage Border = Global Border
 
-newtype CurrentDir = CurrentDir (Buffer 3 Dir) deriving stock (Show)
+data DirInput = DirInput
+  { inputDir :: Dir
+  , inputFrame :: Frame
+  } deriving stock Show
+newtype CurrentDir = CurrentDir (Buffer 3 DirInput) deriving stock (Show)
 instance Component CurrentDir where type Storage CurrentDir = Unique CurrentDir
 
 data Head = Head
@@ -57,7 +61,7 @@ newtype Scrambling = Scrambling Word64
 instance Component Scrambling where type Storage Scrambling = Unique Scrambling
 
 newtype Frame = Frame Word64
-  deriving stock (Show)
+  deriving stock (Eq, Ord, Show)
   deriving newtype (Enum, Bounded, Num)
   deriving (Semigroup, Monoid) via (Sum Frame)
 
