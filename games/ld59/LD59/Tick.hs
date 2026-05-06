@@ -82,13 +82,10 @@ foodPoints = 10
 
 tickSnake :: HasEnv => System World ()
 tickSnake = everyFrame snakeRate $ do
-  cmapM $ \(CurrentDir b, s::Snake) -> do
-    currFrame <- Apecs.get global
-    let halfPeriod = Frame (ratePeriod snakeRate `div` 2)
-    let frameCutoff = if currFrame < halfPeriod then 0 else currFrame - halfPeriod
-    let (mDir, b') = unbufferWhen ((< frameCutoff) . inputFrame) b
-        dir = maybe (snakeHeadDir $ snakeHead s) inputDir mDir
-    pure (snakeMove dir s, CurrentDir b')
+  cmap $ \(CurrentDir b, s::Snake) ->
+    let (mDir, b') = unbuffer b
+        dir = maybe (snakeHeadDir $ snakeHead s) id mDir
+    in (snakeMove dir s, CurrentDir b')
   -- Check for match
   -- We do it _before_ eating, so for one tick the match
   -- is visible.

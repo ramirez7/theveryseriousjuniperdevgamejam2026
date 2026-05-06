@@ -30,11 +30,7 @@ newtype Border = Border { borderSprites :: [Pixi.Sprite] }
 
 instance Component Border where type Storage Border = Global Border
 
-data DirInput = DirInput
-  { inputDir :: Dir
-  , inputFrame :: Frame
-  } deriving stock Show
-newtype CurrentDir = CurrentDir (Buffer 3 DirInput) deriving stock (Show)
+newtype CurrentDir = CurrentDir (Buffer 3 Dir) deriving stock (Show)
 instance Component CurrentDir where type Storage CurrentDir = Unique CurrentDir
 
 data Head = Head

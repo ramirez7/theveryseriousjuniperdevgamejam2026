@@ -82,21 +82,18 @@ rotateSprite :: Pixi.Sprite -> Float -> IO ()
 rotateSprite s a = setProperty "rotation" s (floatAsVal a)
 
 syncSnakeArt :: HasEnv => System World ()
-syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake, f::Frame, CurrentDir b) -> liftIO $ do
-  -- peek ahead into the input buffer here? the easing is weird due to that
-  let nextDir = maybe (snakeHeadDir snakeHead) inputDir (peekbuffer b)
-  let nextSnake@Snake{snakeTail=nextTail} = snakeMove nextDir s
+syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> liftIO $ do
   for_ snakeHead $ \Head{..} -> do
-    let (headTex, headMirror) = case nextDir of
+    let (headTex, headMirror) = case snakeHeadDir snakeHead of
           UP -> (artHeadUp envArt, traverse_ Kleisli [unmirrorSpriteV, unmirrorSpriteH])
           DOWN -> (artHeadUp envArt, traverse_ Kleisli [mirrorSpriteV, unmirrorSpriteH])
           LEFT -> (artHeadSide envArt, traverse_ Kleisli [unmirrorSpriteH, unmirrorSpriteV])
           RIGHT -> (artHeadSide envArt, traverse_ Kleisli [mirrorSpriteH, unmirrorSpriteV])
     runKleisli headMirror headSprite
     setSpriteTexture headSprite headTex
-    setSpritePosOffset headSprite (snakeHeadPos snakeHead) (rateTween f snakeRate *^ dirV2f nextDir)
-  for_ (snakeLocateTail s `zip` snakeTailSegs nextTail) $ \(tailPos, SnakeTailSeg{..}) -> do
+    setSpritePos headSprite (snakeHeadPos snakeHead)
+  for_ (snakeLocateTail s `zip` snakeTailSegs snakeTail) $ \(tailPos, SnakeTailSeg{..}) -> do
     let Tail{..} = snakeTailVal
     rotateSprite tailSprite (unangle $ dirV2f snakeTailDir)
-    setSpritePosOffset tailSprite tailPos (rateTween f snakeRate *^ dirV2f snakeTailDir)
+    setSpritePos tailSprite tailPos
     
