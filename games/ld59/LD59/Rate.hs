@@ -44,6 +44,9 @@ rateTween (Frame f) Rate{..} =
   then rateTween (Frame $ f + ratePeriod) Rate{..}
   else fromIntegral ((f - rateOffset) `mod` ratePeriod) / fromIntegral ratePeriod
 
+rateTweenM :: Rate -> System World Float
+rateTweenM r = fmap (flip rateTween r) (Apecs.get global)
+
 {-
 ghci> rateTween 5 (Rate 5 0)
 0.0

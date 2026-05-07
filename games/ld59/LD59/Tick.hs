@@ -7,6 +7,7 @@ import Apecs
 import LD59.World
 import Ease
 import LD59.Art
+import GHC.Wasm.Prim
 import LD59.Snake
 import Control.Monad (when)
 import Control.Lens
@@ -94,6 +95,8 @@ foodPoints = 10
 
 tickSnake :: HasEnv => System World ()
 tickSnake = openEnv $ \Env{..} -> everyFrameM (fmap snakeLevelRate snakeLevel) $ do
+  Frame f <- Apecs.get global
+  liftIO $ consoleLogVal (stringAsVal $ toJSString $ unwords ["snake move", "f", show f])
   cmap $ \(CurrentDir b, s::Snake) ->
     let (mDir, b') = unbuffer b
         dir = maybe (snakeHeadDir $ snakeHead s) id mDir

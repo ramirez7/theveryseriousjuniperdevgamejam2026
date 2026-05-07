@@ -16,3 +16,6 @@ snakeLevel = Apecs.get global >>= \(Score x) -> pure $ Level $ min 10 (succ $ x 
 snakeLevelRate :: Level -> Rate
 snakeLevelRate (Level n) =
   snakeRate {ratePeriod = ratePeriod snakeRate - 2*n}
+
+currSnakeRate :: System World Rate
+currSnakeRate = snakeLevelRate <$> snakeLevel

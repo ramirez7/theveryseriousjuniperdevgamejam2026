@@ -7,9 +7,11 @@ module LD59.Draw where
 
 import Lib
 import Ease
+import Control.Monad
 import Pixi.Types qualified as Pixi
 import LD59.World
 import LD59.Snake
+import LD59.Level
 import LD59.Rate
 import Data.Foldable
 import Apecs
@@ -89,18 +91,26 @@ invEase :: Num a => Ease a -> Ease a
 invEase ef = \x -> ef (1 - x)
 
 syncSnakeArt :: HasEnv => System World ()
-syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> liftIO $ do
+syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> do
   for_ snakeHead $ \Head{..} -> do
-    let (headTex, headMirror) = case snakeHeadDir snakeHead of
+    let SnakeHead {..} = snakeHead
+    let (headTex, headMirror) = case snakeHeadDir of
           UP -> (artHeadUp envArt, traverse_ Kleisli [unmirrorSpriteV, unmirrorSpriteH])
           DOWN -> (artHeadUp envArt, traverse_ Kleisli [mirrorSpriteV, unmirrorSpriteH])
           LEFT -> (artHeadSide envArt, traverse_ Kleisli [unmirrorSpriteH, unmirrorSpriteV])
           RIGHT -> (artHeadSide envArt, traverse_ Kleisli [mirrorSpriteH, unmirrorSpriteV])
-    runKleisli headMirror headSprite
-    setSpriteTexture headSprite headTex
-    setSpritePos headSprite (snakeHeadPos snakeHead)
-  for_ (snakeLocateTail s `zip` snakeTailSegs snakeTail) $ \(tailPos, SnakeTailSeg{..}) -> do
+    off <- (dirV2f snakeHeadDir ^*) <$> (currSnakeRate >>= rateTweenM)
+    Frame f <- Apecs.get global
+    liftIO $ consoleLogVal (stringAsVal $ toJSString $ unwords ["head off", show off, "snake p", show snakeHeadPos, "f", show f])
+    liftIO $ runKleisli headMirror headSprite
+    liftIO $ setSpriteTexture headSprite headTex
+    liftIO $ setSpritePosOffset headSprite snakeHeadPos 0
+  let tailLocs = snakeLocateTail s
+  let fullLocs = snakeHeadPos snakeHead : tailLocs
+  for_ (zip3 (snakeLocateTail s) fullLocs (snakeTailSegs snakeTail)) $ \(tailPos, nextPos, SnakeTailSeg{..}) -> do
     let Tail{..} = snakeTailVal
-    rotateSprite tailSprite (unangle $ dirV2f snakeTailDir)
-    setSpritePos tailSprite tailPos
+    let moveV2 = fmap fromIntegral $ nextPos - tailPos
+    liftIO $ rotateSprite tailSprite (unangle moveV2)
+    moveOff <- (moveV2 ^*) <$> (currSnakeRate >>= rateTweenM)
+    liftIO $ setSpritePosOffset tailSprite tailPos 0
     
