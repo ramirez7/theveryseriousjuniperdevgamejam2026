@@ -38,6 +38,25 @@ foreign import javascript unsafe
   """
   playClip :: AudioContext -> Clip -> IO ()
 
+-- UNTESTED
+foreign import javascript unsafe
+  """
+  let context = $1
+  let clip = $2
+  let delaySec = $3
+  var buffer = context.createBuffer(1, clip.array.length, clip.sampleRate);
+  buffer.getChannelData(0).set(clip.toFloat32Array());
+  context.resume().then(function() {
+    var source = context.createBufferSource();
+    source.buffer = buffer;
+    var delay = context.createDelay(delaySec);
+    source.connect(delay);
+    delay.connect(context.destination);
+    source.start(0);
+  });
+  """
+  playClipWithDelay :: AudioContext -> Clip -> Float -> IO ()
+
 newtype AudioBuffer = AudioBuffer JSVal
 foreign import javascript safe
   """

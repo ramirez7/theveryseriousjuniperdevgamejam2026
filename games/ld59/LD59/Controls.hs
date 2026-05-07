@@ -16,8 +16,6 @@ import Apecs
 import Control.Monad (unless, when)
 import Lib
 import Control.Monad.IO.Class
-import LD59.Jfxr.Types
-import LD59.Jfxr.JSFFI qualified as Jfxr
 import Data.Coerce
 import LD59.Screen
 import Pixi.Types qualified as Pixi
@@ -26,6 +24,7 @@ import LD59.Wave
 import LD59.Init
 import LD59.Env
 import LD59.Score
+import LD59.Sfx
 
 jfxrStr :: JSString
 jfxrStr = toJSString """
@@ -41,7 +40,9 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
   bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
   bindKey w Playing ["Space"] $ do
-    cmap $ \(s::Snake, Not :: Not Scrambling) -> Scrambling 3
+    cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
+      playJfxr scrambleNoise
+      pure $ Scrambling 3
   bindKey w Dead ["Enter"] $ do
     switchBGM Playing
     updateScore (const (Score 0))

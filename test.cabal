@@ -114,6 +114,7 @@ library ld59-lib
     LD59.Rate
     LD59.Score
     LD59.Screen
+    LD59.Sfx
     LD59.Snake
     LD59.Tick
     LD59.Wave

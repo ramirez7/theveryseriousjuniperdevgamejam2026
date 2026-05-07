@@ -1,0 +1,93 @@
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NegativeLiterals #-}
+{-# LANGUAGE LambdaCase #-}
+module LD59.Sfx where
+
+import LD59.Env
+import LD59.Art
+import LD59.World
+import Data.Function ((&))
+import LD59.Jfxr.Types
+import LD59.Jfxr.JSFFI
+import Control.Monad.IO.Class
+import Control.Monad ((>=>))
+import Data.Scientific
+import LD59.Wave
+
+baseSfx :: HasEnv => JfxrDef
+baseSfx = openEnv $ \Env{..} -> artSinJfxr envArt
+
+waveToJfxr :: Wave -> String
+waveToJfxr = \case
+  TRI -> "triangle"
+  SIN -> "sine"
+  SQUARE -> "square"
+  SAW -> "sawtooth"
+  TAN -> "tangent"
+
+playJfxr :: MonadIO m => HasEnv => JfxrDef -> m ()
+playJfxr = openEnv $ \Env{..} -> liftIO . (newClip >=> playClip envAudio)
+
+foodSfx :: HasEnv => Wave -> JfxrDef
+foodSfx w = withNote D 3 $ withWave w  baseSfx
+
+clearSfx :: HasEnv => Wave -> [JfxrDef]
+clearSfx w =
+  zipWith (uncurry withNote) [(D,4), (A,4), (D,5)] (replicate 3 (foodSfx w)) &
+    fmap (withDecay 0.25) &
+    fmap (withSustain 0.5)
+
+scrambleNoise :: HasEnv => JfxrDef
+scrambleNoise = openEnv $ \Env{..} ->
+  artSinJfxr envArt &
+    withWaveform "whitenoise" &
+    withDecay 1
+
+withNote :: Note -> Octave -> JfxrDef -> JfxrDef
+withNote n o d = d { jfxrFrequency = noteFreq n o }
+
+withWaveform :: String -> JfxrDef -> JfxrDef
+withWaveform wf d = d { jfxrWaveform = wf }
+
+withWave :: Wave -> JfxrDef -> JfxrDef
+withWave = withWaveform . waveToJfxr
+
+withDecay :: Scientific -> JfxrDef -> JfxrDef
+withDecay dl d = d { jfxrDecay = dl }
+
+withSustain :: Scientific -> JfxrDef -> JfxrDef
+withSustain dl d = d { jfxrSustain = dl }
+data Note =
+    C
+  | Cs
+  | D
+  | Ds
+  | E
+  | F
+  | Fs
+  | G
+  | Gs
+  | A
+  | As
+  | B
+  deriving (Eq, Ord, Show, Enum, Bounded)
+
+type Octave = Int
+
+noteFreq :: Note -> Octave -> Scientific
+noteFreq n o = noteFreq4 n * 2 ^^ (o - 4)
+
+noteFreq4 :: Note -> Scientific
+noteFreq4 = \case
+  C -> 261.63
+  Cs -> 277.18
+  D -> 293.66
+  Ds -> 311.13
+  E -> 329.63
+  F -> 349.23
+  Fs -> 369.99
+  G -> 392
+  Gs -> 415.30
+  A -> 440
+  As -> 466.16
+  B -> 493.88

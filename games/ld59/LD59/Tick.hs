@@ -5,6 +5,7 @@ module LD59.Tick where
 
 import Apecs
 import LD59.World
+import LD59.Art
 import LD59.Snake
 import Control.Monad (when)
 import Control.Lens
@@ -25,6 +26,7 @@ import LD59.Score
 import Data.Tuple.Extra (uncurry3)
 import LD59.Rate
 import LD59.Level
+import LD59.Sfx
 
 tickFrame :: System World ()
 tickFrame = modify global (succ @Frame)
@@ -81,7 +83,7 @@ foodPoints :: Score
 foodPoints = 10
 
 tickSnake :: HasEnv => System World ()
-tickSnake = everyFrameM (fmap snakeLevelRate snakeLevel) $ do
+tickSnake = openEnv $ \Env{..} -> everyFrameM (fmap snakeLevelRate snakeLevel) $ do
   cmap $ \(CurrentDir b, s::Snake) ->
     let (mDir, b') = unbuffer b
         dir = maybe (snakeHeadDir $ snakeHead s) id mDir
@@ -91,7 +93,8 @@ tickSnake = everyFrameM (fmap snakeLevelRate snakeLevel) $ do
   -- is visible.
   cmapM $ \(s::Snake) -> do
     let (newSnake, match) = snakeMatch tailWave s
-    for_ match $ \(t, _) -> do
+    for_ match $ \(t, w) -> do
+      traverse_ playJfxr $ clearSfx w
       updateScore (+ (sum $ fmap (const foodPoints) t))
       cleanupSnakeTail t
     pure newSnake
@@ -100,6 +103,7 @@ tickSnake = everyFrameM (fmap snakeLevelRate snakeLevel) $ do
     cmapM_ $ uncurry3 $ \(s@Snake{..}::Snake) -> \snakeEty -> \case
       Nothing -> do
         when (snakeHeadPos snakeHead == foodPos) $ do
+          playJfxr $ foodSfx $ tailWave foodStuff
           updateScore (+ foodPoints)
           Apecs.set snakeEty $ snakeEat id foodStuff s
           destroy foodEty (Proxy @Food)
@@ -114,7 +118,9 @@ tickSnake = everyFrameM (fmap snakeLevelRate snakeLevel) $ do
     let oob = hx < 0 || hy < 0 || hx > worldBounds ^. _x || hy > worldBounds ^. _y
     let onTail = snakeHeadPos snakeHead `elem` snakeLocateTail s
     when (oob || onTail) $ cmapM $ \(_::Screen) -> switchBGM Dead >> pure Dead
-  cmap $ \case
-    Scrambling 0 -> Nothing
-    Scrambling n -> Just $ Scrambling $ pred n
+  cmapM $ \case
+    Scrambling 0 -> pure $ Nothing
+    Scrambling n -> do
+      playJfxr scrambleNoise
+      pure $ Just $ Scrambling $ pred n
 
