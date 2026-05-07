@@ -5,6 +5,7 @@ module LD59.Tick where
 
 import Apecs
 import LD59.World
+import Ease
 import LD59.Art
 import LD59.Snake
 import Control.Monad (when)
@@ -79,6 +80,14 @@ animScramble = everyFrame scrambleAnimRate $ do
       d <- valAsInt <$> getProperty "angle" headSprite
       setProperty "angle" headSprite (intAsVal $ d + scrambleTickDegrees)
 
+animFood :: System World ()
+animFood = do
+  f <- Apecs.get global
+  cmapM_ $ \Food{..} -> do
+    let foodTween = pieceEase 0.5 quadIn (invEase quadOut) (rateTween f foodAnimRate)
+    let tileSizef = fromIntegral tileSize
+    let foodOffset = (foodTween - 1.0) / 4
+    liftIO $ setSpritePosOffset (tailSprite foodStuff) foodPos (V2 0 foodOffset)
 foodPoints :: Score
 foodPoints = 10
 

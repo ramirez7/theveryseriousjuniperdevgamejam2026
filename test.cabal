@@ -84,6 +84,7 @@ common ld59-shared
     base,
     bytestring,
     containers,
+    ease,
     extra,
     generic-lens,
     ghc-experimental,

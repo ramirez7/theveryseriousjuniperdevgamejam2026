@@ -74,6 +74,7 @@ main = do
             tickFoodSpawn
             animTail
             animScramble
+            animFood
             syncSnakeArt
           )
     

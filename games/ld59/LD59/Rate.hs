@@ -17,6 +17,9 @@ snakeRate = Rate 24 0
 tailAnimRate :: Rate
 tailAnimRate = Rate 10 0
 
+foodAnimRate :: Rate
+foodAnimRate = Rate 60 0
+
 scrambleAnimRate :: Rate
 scrambleAnimRate = Rate 5 0
 

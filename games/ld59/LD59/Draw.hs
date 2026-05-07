@@ -6,6 +6,7 @@
 module LD59.Draw where
 
 import Lib
+import Ease
 import Pixi.Types qualified as Pixi
 import LD59.World
 import LD59.Snake
@@ -80,6 +81,12 @@ setSpriteTexture s t = setProperty "texture" s t
 
 rotateSprite :: Pixi.Sprite -> Float -> IO ()
 rotateSprite s a = setProperty "rotation" s (floatAsVal a)
+
+pieceEase :: Ord a => Fractional a => a -> Ease a -> Ease a -> Ease a
+pieceEase cutoff ef1 ef2 = \x -> if x < cutoff then ef1 (x / cutoff) else ef2 ((x - cutoff) / (1 - cutoff))
+
+invEase :: Num a => Ease a -> Ease a
+invEase ef = \x -> ef (1 - x)
 
 syncSnakeArt :: HasEnv => System World ()
 syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> liftIO $ do
