@@ -31,6 +31,7 @@ foreign export javascript "wasmMain" main :: IO ()
 main :: IO ()
 main = do
   ac <- Jfxr.newAudioContext
+
   art <- newArt
   -- Initialize PIXI application
   app <- do

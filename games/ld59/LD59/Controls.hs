@@ -41,6 +41,8 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKey w Playing ["Space"] $ do
     cmap $ \(s::Snake, Not :: Not Scrambling) -> Scrambling 3
   bindKey w Dead ["Enter"] $ do
+    -- TODO: Save it in apecs global
+    liftIO $ Jfxr.fetchWav envAudio "playing-ld59.wav" >>= Jfxr.loopAudioBuffer envAudio
     updateScore (const (Score 0))
     cleanupSnake
     cleanupFood

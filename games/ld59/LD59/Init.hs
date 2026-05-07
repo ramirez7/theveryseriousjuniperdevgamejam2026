@@ -56,6 +56,7 @@ initGame = openEnv $ \Env{..} -> do
 initBG :: HasEnv => System World ()
 initBG = openEnv $ \Env{..} -> do
   bgs <- liftIO $ newTilingSprite (artBG envArt) playAreaWidth playAreaHeight
+  --liftIO $ setProperty "tint" bgs (stringAsVal "red")
   liftIO $ setSpritePos bgs (V2 0 0)
   liftIO $ addPlayAreaChild bgs
   Apecs.set global (BG $ Just bgs)

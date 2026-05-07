@@ -37,3 +37,28 @@ foreign import javascript unsafe
   });
   """
   playClip :: AudioContext -> Clip -> IO ()
+
+newtype AudioBuffer = AudioBuffer JSVal
+foreign import javascript safe
+  """
+  const response = await fetch($2);
+  const arrayBuffer = await response.arrayBuffer();
+  const audioBuffer = await $1.decodeAudioData(arrayBuffer);
+  return audioBuffer;
+  """
+  fetchWav :: AudioContext -> JSString -> IO AudioBuffer
+
+newtype AudioBufferSourceNode = AudioBufferSourceNode JSVal
+foreign import javascript unsafe
+  """
+  const source = $1.createBufferSource();
+  source.buffer = $2;
+  source.loop = true;
+  source.connect($1.destination);
+  source.start(0);
+  return source;
+  """
+  loopAudioBuffer :: AudioContext -> AudioBuffer -> IO AudioBufferSourceNode
+
+foreign import javascript unsafe "$1.stop()"
+  stopAudioBSN :: AudioBufferSourceNode -> IO ()
