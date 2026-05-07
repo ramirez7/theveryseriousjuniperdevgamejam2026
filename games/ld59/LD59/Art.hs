@@ -28,6 +28,8 @@ data Art = Art
   , artTangent :: Pixi.Texture
   , artTriangle :: Pixi.Texture
   , artSinJfxr :: JfxrDef
+  , artPlayingBGM :: AudioBuffer
+  , artGameoverBGM :: AudioBuffer
   }
 
 waveSpriteArt :: Art -> Wave -> Pixi.Texture
@@ -38,8 +40,8 @@ waveSpriteArt Art{..} = \case
   SAW -> artSaw
   TAN -> artTangent
 
-newArt ::  IO Art
-newArt = do
+newArt :: AudioContext -> IO Art
+newArt ac = do
   artHeadTexture <- loadTexture "./h.png"
   artTailTexture <- loadTexture "./t.png"
   artBG <- loadTexture "./BG.png"
@@ -53,6 +55,8 @@ newArt = do
   artTangent <- loadTexture "./Tangent.png"
   artTriangle <- loadTexture "./Triangle.png"
   artSinJfxr <- fetchJfxrDef "./ld59-sin.jfxr"
+  artPlayingBGM <- fetchWav ac "./playing-ld59.wav"
+  artGameoverBGM <- fetchWav ac "./gameover-ld59.wav"
   pure Art{..}
 
 fetchJfxrDef :: JSString -> IO JfxrDef

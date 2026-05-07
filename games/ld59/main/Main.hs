@@ -32,7 +32,7 @@ main :: IO ()
 main = do
   ac <- Jfxr.newAudioContext
 
-  art <- newArt
+  art <- newArt ac
   -- Initialize PIXI application
   app <- do
     x <- newApp

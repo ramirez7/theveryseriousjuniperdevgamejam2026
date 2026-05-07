@@ -10,6 +10,7 @@ import Control.Monad (when)
 import Control.Lens
 import LD59.Draw
 import LD59.Init
+import LD59.BGM
 import LD59.Wave
 import LD59.Random
 import Data.Foldable (traverse_)
@@ -112,7 +113,7 @@ tickSnake = everyFrameM (fmap snakeLevelRate snakeLevel) $ do
     let V2 hx hy = snakeHeadPos snakeHead
     let oob = hx < 0 || hy < 0 || hx > worldBounds ^. _x || hy > worldBounds ^. _y
     let onTail = snakeHeadPos snakeHead `elem` snakeLocateTail s
-    when (oob || onTail) $ cmap $ \(_::Screen) -> Dead
+    when (oob || onTail) $ cmapM $ \(_::Screen) -> switchBGM Dead >> pure Dead
   cmap $ \case
     Scrambling 0 -> Nothing
     Scrambling n -> Just $ Scrambling $ pred n

@@ -7,7 +7,9 @@ module LD59.Controls where
 
 import LD59.World
 import LD59.Buffer
+import LD59.BGM
 import LD59.Art
+import Data.Foldable (traverse_)
 import GHC.Wasm.Prim
 import LD59.Dir
 import Apecs
@@ -41,8 +43,7 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKey w Playing ["Space"] $ do
     cmap $ \(s::Snake, Not :: Not Scrambling) -> Scrambling 3
   bindKey w Dead ["Enter"] $ do
-    -- TODO: Save it in apecs global
-    liftIO $ Jfxr.fetchWav envAudio "playing-ld59.wav" >>= Jfxr.loopAudioBuffer envAudio
+    switchBGM Playing
     updateScore (const (Score 0))
     cleanupSnake
     cleanupFood

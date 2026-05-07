@@ -15,6 +15,7 @@ import Data.Monoid (Sum (..), First (..))
 import Linear.V2
 import LD59.Wave
 import LD59.Buffer
+import LD59.Jfxr.JSFFI (AudioBufferSourceNode)
 
 data Screen = Title | Playing | Dead deriving stock (Show, Eq)
 
@@ -70,4 +71,8 @@ newtype Score = Score { rawScore :: Word64 }
 
 instance Component Score where type Storage Score = Global Score
 
-makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling]
+newtype BGM = BGM { bgmAudio :: Maybe AudioBufferSourceNode }
+  deriving (Semigroup, Monoid) via (First AudioBufferSourceNode)
+instance Component BGM where type Storage BGM = Global BGM
+
+makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling, ''BGM]
