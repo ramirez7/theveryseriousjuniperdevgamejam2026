@@ -52,9 +52,7 @@ main = do
     gameTicker <- newTicker
     setProperty "maxFPS" gameTicker (intAsVal 60)
     setProperty "minFPS" gameTicker (intAsVal 60)
-    
-    
-    
+
     w <- initWorld
     runWith w $ do
       initBG

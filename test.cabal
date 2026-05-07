@@ -104,6 +104,7 @@ library ld59-lib
     LD59.BGM
     LD59.Buffer
     LD59.Controls
+    LD59.Debug
     LD59.Dir
     LD59.Draw
     LD59.Env

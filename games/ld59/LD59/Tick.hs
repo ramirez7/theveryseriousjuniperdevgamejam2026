@@ -88,6 +88,7 @@ animFood = do
     let tileSizef = fromIntegral tileSize
     let foodOffset = (foodTween - 1.0) / 4
     liftIO $ setSpritePosOffset (tailSprite foodStuff) foodPos (V2 0 foodOffset)
+
 foodPoints :: Score
 foodPoints = 10
 
