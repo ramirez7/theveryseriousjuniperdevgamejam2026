@@ -39,6 +39,28 @@ foreign import javascript unsafe "new PIXI.Application()"
 foreign import javascript unsafe "new PIXI.Application({ width: $1, height: $2 })"
    newAppSized :: Int -> Int -> IO Pixi.Application
 
+foreign import javascript unsafe
+  """
+  function resize() {
+    const app = $1;
+    const appWidth = app.screen.width;
+    const appHeight = app.screen.height;
+    console.log("wiw", window.innerWidth, "aw", appWidth, "wih", window.innerHeight, "ah", appHeight);
+    const scale = Math.floor(Math.min(window.innerWidth / appWidth, window.innerHeight / appHeight));
+    console.log("scale", scale);
+    app.stage.scale.set(scale);
+    /*
+    app.stage.position.set(
+        (window.innerWidth - appWidth * scale) / 2,
+        (window.innerHeight - appHeight * scale) / 2
+    );
+    */
+}
+  window.addEventListener('resize', resize);
+  resize();
+  """
+  resizeAppToScreen :: Pixi.Application -> IO ()
+
 -- | Creates a new PIXI.js Text object with the specified text and fill color.
 --
 -- @param text The text content to display

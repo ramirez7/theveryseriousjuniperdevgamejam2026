@@ -38,6 +38,7 @@ main = do
     x <- newApp
     x' <- initAppSized x gameWidth gameHeight
     appendCanvas x'
+    resizeAppToScreen x'
     pure x'
   pa <- initPlayArea app
   scoreTxt <- initScoreText app

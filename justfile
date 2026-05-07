@@ -34,8 +34,8 @@ serve exe: (bundle exe 'ln -sr')
 
 # UNTESTED
 zip exe: (bundle exe)
-    zip -rj ld59-prep.zip bundles/ld59-prep/*
-    zip -d ld59-prep.zip '*~'
+    zip -rj {{exe}}.zip bundles/{{exe}}/*
+    zip -d {{exe}}.zip '*~'
 
 gild:
     fd .cabal --exec cabal-gild --io={}
