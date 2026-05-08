@@ -455,3 +455,9 @@ foreign import javascript unsafe "$1.touches[0]"
 
 foreign import javascript unsafe "$1.changedTouches[0]"
   getEventChangedTouch :: JSVal -> IO JSVal
+
+foreign import javascript unsafe "$1.changedTouches.length"
+  getEventChangedTouchNum :: JSVal -> IO Int
+
+foreign import javascript unsafe "new Date().getTime()"
+  jsGetTime :: IO JSVal

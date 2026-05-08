@@ -35,23 +35,24 @@ jfxrStr = toJSString """
 
 handleInput :: HasEnv => World -> IO ()
 handleInput w = openEnv $ \Env{..} -> do
-  --ctx <- Jfxr.newAudioContext
-  --clip <- Jfxr.newClip jfxrStr
   bindKeyDir w Playing ["KeyS", "ArrowDown"] DOWN
   bindKeyDir w Playing ["KeyW", "ArrowUp"] UP
   bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
   bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
+
+  bindTouchDoubleTap w (gateScreen Title $ screenTransition Playing)
+  bindTouchDoubleTap w (gateScreen Dead $ screenTransition Playing)
+  bindTouchSwipe w (traverse_ setCurrentDir . v2Dir 45)
+  bindTouchTwoFingerTap w $ gateScreen Playing $ do
+    cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
+      playJfxr scrambleNoise
+      pure $ Scrambling 3
   bindKey w Playing ["Space"] $ do
     cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
       playJfxr scrambleNoise
       pure $ Scrambling 3
   bindKey w Title ["Enter"] $ screenTransition Playing
   bindKey w Dead ["Enter"] $ screenTransition Playing
-    --liftIO $ Jfxr.newClip ((artSinJfxr envArt) { jfxrWaveform = waveToJfxr SAW }) >>= Jfxr.playClip envAudio
-{-  addWindowEventListener "keydown" =<< jsFuncFromHs_ (\_ -> do
-                                                         consoleLogShow "PLAY"
-                                                         consoleLogVal (coerce clip)
-                                                         Jfxr.playClip ctx clip)-}
 
 bindKey :: World -> Screen -> [String] -> System World () -> IO ()
 bindKey w screen keycodes sys =
@@ -72,13 +73,32 @@ setCurrentDir :: Dir -> System World ()
 setCurrentDir dir = cmap $ \(CurrentDir b) -> 
   CurrentDir (buffer dir b)
 
-bindTouchSwipe :: (V2 Float -> System World ()) -> IO ()
-bindTouchSwipe f = do
-  start <- liftIO $ newIORef (V2 0 0)
-  let recordTouchStart e = do
-        x <- pure . valAsFloat =<< getProperty "clientX" =<< getEventTouch e
-        y <- pure . valAsFloat =<< getProperty "clientY" =<< getEventTouch e
-        let xy = V2 x y
-        consoleLogStr $ unwords ["touchstart", show xy]
-        atomicWriteIORef start (V2 x y)
-  addWindowEventListener "touchstart" undefined
+bindTouchSwipe :: World -> (V2 Float -> System World ()) -> IO ()
+bindTouchSwipe w f = do
+  startRef <- liftIO $ newIORef (V2 0 0)
+  addDocumentEventListenerHs "touchstart" $ \e -> do
+    x <- liftIO $ pure . valAsFloat =<< getProperty "clientX" =<< getEventTouch e
+    y <- liftIO $ pure . valAsFloat =<< getProperty "clientY" =<< getEventTouch e
+    liftIO $ atomicWriteIORef startRef (V2 x y)
+  addDocumentEventListenerHs "touchend" $ \e -> do
+    endX <- liftIO $ pure . valAsFloat =<< getProperty "clientX" =<< getEventChangedTouch e
+    endY <- liftIO $ pure . valAsFloat =<< getProperty "clientY" =<< getEventChangedTouch e
+    startXY <- liftIO $ readIORef startRef
+    let diffXY = V2 endX endY - startXY
+    runWith w (f diffXY)
+
+bindTouchDoubleTap :: World -> System World () -> IO ()
+bindTouchDoubleTap w k = do
+  lastTapRef <- liftIO $ newIORef 0
+  addDocumentEventListenerHs "touchend" $ \_ -> do
+    t <- liftIO $ valAsFloat <$> jsGetTime
+    lastTap <- readIORef lastTapRef
+    let tapLen = t - lastTap
+    liftIO $ writeIORef lastTapRef t
+    when (tapLen < 300) $ runWith w k
+
+bindTouchTwoFingerTap :: World -> System World () -> IO ()
+bindTouchTwoFingerTap w k = do
+  addDocumentEventListenerHs "touchend" $ \e -> do
+    n <-getEventChangedTouchNum e
+    when (n == 2) $ runWith w k

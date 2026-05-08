@@ -37,8 +37,8 @@ radToDeg r      = r * 180 / pi
 {-# INLINE radToDeg #-}
 
 -- 
-v2Dir :: V2 Float -> Float -> Maybe Dir
-v2Dir v tolDeg =
+v2Dir :: Float -> V2 Float -> Maybe Dir
+v2Dir tolDeg v =
   let vdeg = radToDeg (unangle v)
       withinVdeg x = abs (vdeg - x) < tolDeg
   in case filter (withinVdeg . radToDeg . unangle . dirV2f) [minBound..] of
