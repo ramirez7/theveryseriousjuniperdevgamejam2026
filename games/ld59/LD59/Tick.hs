@@ -93,7 +93,14 @@ animFood = do
     let tileSizef = fromIntegral tileSize
     let foodOffset = (foodTween - 1.0) / 4
     liftIO $ setSpritePosOffset (tailSprite foodStuff) foodPos (V2 0 foodOffset)
-
+{-
+animMainText :: System World ()
+  cmapM_ $ \Food{..} -> do
+    tween <- pieceEase 0.5 quadIn (invEase quadOut) <$> rateTweenM foodAnimRate
+    let tileSizef = fromIntegral tileSize
+    let offset = (foodTween - 1.0) / 4
+    liftIO $ setSpritePosOffset (tailSprite foodStuff) foodPos (V2 0 foodOffset)
+-}
 foodPoints :: Score
 foodPoints = 10
 

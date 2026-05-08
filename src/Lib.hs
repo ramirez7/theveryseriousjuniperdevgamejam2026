@@ -69,6 +69,20 @@ foreign import javascript unsafe
 foreign import javascript unsafe "new PIXI.Text({text: $1, style: {fill: $2 }})"
    newText :: JSString -> JSString -> IO Pixi.Text
 
+foreign import javascript unsafe
+  """
+  new PIXI.Text({
+    text: $1,
+    style: {
+      fill: $2,
+      fontFamily: $3,
+      fontSize: $4,
+      align: $5
+    }
+  })
+  """
+   newTextCustom :: JSString -> JSString -> JSString -> Int -> JSString -> IO Pixi.Text
+
 -- | Initializes a PIXI.js Application with the given background color.
 --
 -- This function uses a safe import because it needs to await the result of

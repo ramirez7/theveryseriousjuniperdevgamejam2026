@@ -18,4 +18,5 @@ updateScore f = openEnv $ \Env{..} -> do
   oldScore <- Apecs.get global
   let newScore = f oldScore
   Apecs.set global newScore
-  liftIO $ setProperty "text" envScore (stringAsVal $ toJSString $ show $ rawScore newScore)
+  let scoreTxt = unwords ["Score:", show (rawScore newScore)]
+  liftIO $ setProperty "text" envScore (stringAsVal $ toJSString scoreTxt)

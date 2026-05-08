@@ -118,6 +118,7 @@ library ld59-lib
     LD59.Screen
     LD59.Sfx
     LD59.Snake
+    LD59.Text
     LD59.Tick
     LD59.Wave
     LD59.World

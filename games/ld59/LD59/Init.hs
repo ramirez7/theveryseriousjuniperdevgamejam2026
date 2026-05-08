@@ -6,6 +6,7 @@ import LD59.World
 import LD59.Snake
 import LD59.Dir
 import LD59.Draw
+import LD59.Text
 import Pixi.Types qualified as Pixi
 import Apecs
 import LD59.Buffer
@@ -99,8 +100,10 @@ cleanupFood = cmapM $ \Food{..} -> do
   
 initScoreText :: Pixi.Application -> IO Pixi.Text
 initScoreText app = do
-  txt <- newText "0" "red"
+  txt <- newScoreText ""
   setProperty "x" txt (intAsVal $ gameWidth `div` 2)
-  setProperty "y" txt (intAsVal $ 0)
+  setProperty "y" txt (intAsVal $ tileSize `div` 2)
   addChild app txt
   pure txt
+
+--initMainText :: Pixi.Application -> IO Pixi.Text
