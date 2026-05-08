@@ -25,6 +25,8 @@ import LD59.Init
 import LD59.Env
 import LD59.Score
 import LD59.Sfx
+import Data.IORef
+import Linear.V2
 
 jfxrStr :: JSString
 jfxrStr = toJSString """
@@ -50,7 +52,8 @@ handleInput w = openEnv $ \Env{..} -> do
                                                          consoleLogShow "PLAY"
                                                          consoleLogVal (coerce clip)
                                                          Jfxr.playClip ctx clip)-}
-bindKey :: World -> Screen -> [String] -> System World () ->IO ()
+
+bindKey :: World -> Screen -> [String] -> System World () -> IO ()
 bindKey w screen keycodes sys =
   addWindowEventListener "keydown" =<< jsFuncFromHs_ (runWith w . gateKeypress keycodes (gateScreen screen sys))
 
@@ -68,3 +71,14 @@ gateKeypress expectedCodes k e = do
 setCurrentDir :: Dir -> System World ()
 setCurrentDir dir = cmap $ \(CurrentDir b) -> 
   CurrentDir (buffer dir b)
+
+bindTouchSwipe :: (V2 Float -> System World ()) -> IO ()
+bindTouchSwipe f = do
+  start <- liftIO $ newIORef (V2 0 0)
+  let recordTouchStart e = do
+        x <- pure . valAsFloat =<< getProperty "clientX" =<< getEventTouch e
+        y <- pure . valAsFloat =<< getProperty "clientY" =<< getEventTouch e
+        let xy = V2 x y
+        consoleLogStr $ unwords ["touchstart", show xy]
+        atomicWriteIORef start (V2 x y)
+  addWindowEventListener "touchstart" undefined

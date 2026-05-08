@@ -46,15 +46,14 @@ foreign import javascript unsafe
     const appWidth = app.screen.width;
     const appHeight = app.screen.height;
     console.log("wiw", window.innerWidth, "aw", appWidth, "wih", window.innerHeight, "ah", appHeight);
-    const scale = Math.floor(Math.min(window.innerWidth / appWidth, window.innerHeight / appHeight));
+    const scale = Math.min(window.innerWidth / appWidth, window.innerHeight / appHeight);
     console.log("scale", scale);
     app.stage.scale.set(scale);
-    /*
     app.stage.position.set(
         (window.innerWidth - appWidth * scale) / 2,
         (window.innerHeight - appHeight * scale) / 2
     );
-    */
+    app.renderer.resize(window.innerWidth, window.innerHeight);
 }
   window.addEventListener('resize', resize);
   resize();
@@ -102,7 +101,7 @@ foreign import javascript safe
 -- TODO: JSFFI is weird with await..why do we need to do this return stuff?
 foreign import javascript safe
   """
-  const r = await $1.init({width: $2, height: $3, antialias: false})
+  const r = await $1.init({width: $2, height: $3, antialias: false, autoDensity: true})
   return $1
   """
   initAppSized :: Pixi.Application -> Int -> Int -> IO Pixi.Application
@@ -162,6 +161,8 @@ foreign import javascript unsafe "console.log($1)"
 consoleLogShow :: Show a => a -> IO ()
 consoleLogShow = consoleLogVal . stringAsVal . toJSString . show
 
+consoleLogStr :: String -> IO ()
+consoleLogStr = consoleLogVal . stringAsVal . toJSString
 -- *****************************************************************************
 -- * Asset Loading
 -- *****************************************************************************
@@ -443,3 +444,14 @@ addEventListener e o l = addEventListener' e (coerce o) l
 
 foreign import javascript unsafe "window.addEventListener($1, $2)"
   addWindowEventListener :: JSString -> JSFunction -> IO ()
+
+foreign import javascript unsafe "document.addEventListener($1, $2)"
+  addDocumentEventListener :: JSString -> JSFunction -> IO ()
+
+addDocumentEventListenerHs :: JSString -> (JSVal -> IO ()) -> IO ()
+addDocumentEventListenerHs e f = jsFuncFromHs_ f >>= addDocumentEventListener e
+foreign import javascript unsafe "$1.touches[0]"
+  getEventTouch :: JSVal -> IO JSVal
+
+foreign import javascript unsafe "$1.changedTouches[0]"
+  getEventChangedTouch :: JSVal -> IO JSVal
