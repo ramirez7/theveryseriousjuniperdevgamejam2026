@@ -43,14 +43,9 @@ handleInput w = openEnv $ \Env{..} -> do
     cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
       playJfxr scrambleNoise
       pure $ Scrambling 3
-  bindKey w Dead ["Enter"] $ do
-    switchBGM Playing
-    updateScore (const (Score 0))
-    cleanupSnake
-    cleanupFood
+  bindKey w Title ["Enter"] $ screenTransition Playing
+  bindKey w Dead ["Enter"] $ screenTransition Playing
     --liftIO $ Jfxr.newClip ((artSinJfxr envArt) { jfxrWaveform = waveToJfxr SAW }) >>= Jfxr.playClip envAudio
-    initGame
-    cmap $ \(_::Screen) -> Playing
 {-  addWindowEventListener "keydown" =<< jsFuncFromHs_ (\_ -> do
                                                          consoleLogShow "PLAY"
                                                          consoleLogVal (coerce clip)

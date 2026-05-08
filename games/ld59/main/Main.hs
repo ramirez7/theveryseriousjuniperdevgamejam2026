@@ -61,7 +61,7 @@ main = do
         -- foreground some stuff
         addChild app scoreTxt
         addChild app pa
-      initGame
+      newEntity_ Title
       syncSnakeArt
     
     callAddTicker gameTicker =<< jsFuncFromHs_

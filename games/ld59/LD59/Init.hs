@@ -50,7 +50,6 @@ initGame = openEnv $ \Env{..} -> do
         , snakeStomachDir = RIGHT
         }
   newEntity_ (CurrentDir $ Buffer [], initSnake)
-  newEntity_ Dead
   newFood (last initialTail) (V2 8 8)
 
 initBG :: HasEnv => System World ()
