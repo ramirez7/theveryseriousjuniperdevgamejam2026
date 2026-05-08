@@ -7,6 +7,7 @@ import Apecs
 import LD59.World
 import Ease
 import LD59.Art
+import LD59.Screen
 import GHC.Wasm.Prim
 import LD59.Snake
 import Control.Monad (when, guard)
@@ -143,7 +144,7 @@ tickSnake = openEnv $ \Env{..} -> everyFrameM (fmap snakeLevelRate snakeLevel) $
     let onTail = snakeHeadPos snakeHead `elem` snakeLocateTail s
     when (oob || onTail) $ do
       liftIO $ consoleLogVal $ stringAsVal $ toJSString $ unwords ["h", show (snakeHeadPos snakeHead), "t", show (snakeLocateTail s)]
-      cmapM $ \(_::Screen) -> switchBGM Dead >> pure Dead
+      screenTransition Dead
   cmapM $ \case
     Scrambling 0 -> pure $ Nothing
     Scrambling n -> do

@@ -1,8 +1,11 @@
 {-# LANGUAGE MultilineStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
 module LD59.Text where
 
 import GHC.Wasm.Prim
 import Pixi.Types qualified as Pixi
+import Control.Monad.IO.Class
+import Lib
 
 foreign import javascript safe
   """
@@ -19,17 +22,6 @@ foreign import javascript unsafe
     fontFamily: 'PressStart2P',
     fontSize: 24,
     fill: 'white',
-/*    stroke: {
-        color: 'black',
-        width: 5
-    },
-
-    dropShadow: {
-        color: 'black',
-        blur: 4,
-        distance: 6,
-        angle: Math.PI / 6
-    },*/
     wordWrap: true,
     wordWrapWidth: 440,
     lineHeight: 40,
@@ -37,10 +29,57 @@ foreign import javascript unsafe
   });
 
   const txt = new PIXI.Text({
-    text: $1,
+    text: '',
     style: gameStyle
   });
   txt.anchor.set(0.5);
   return txt;
   """
-  newScoreText :: JSString -> IO Pixi.Text
+  newScoreText :: IO Pixi.Text
+
+foreign import javascript unsafe
+  """
+  const titleStyle = new PIXI.TextStyle({
+    fontFamily: 'PressStart2P',
+    fontSize: 36,
+    fill: 'white',
+    wordWrap: true,
+    wordWrapWidth: 440,
+    lineHeight: 40,
+    align: 'center'
+  });
+  const txt = new PIXI.Text({
+    text: 'Digital Signal Puzzler',
+    style: titleStyle
+  });
+  txt.anchor.set(0.5)
+  return txt;
+  """
+  newTitleText :: IO Pixi.Text
+
+foreign import javascript unsafe
+  """
+  const style = new PIXI.TextStyle({
+    fontFamily: 'PressStart2P',
+    fontSize: 36,
+    fill: 'red',
+    wordWrap: true,
+    wordWrapWidth: 440,
+    lineHeight: 40,
+    align: 'center'
+  });
+  const txt = new PIXI.Text({
+    text: 'GAME OVER',
+    style: style
+  });
+  txt.anchor.set(0.5)
+  return txt;
+  """
+  newGameOverText :: IO Pixi.Text
+
+
+textVisible :: MonadIO m => Pixi.Text -> m ()
+textVisible t = liftIO $ setProperty "visible" t (boolAsVal True)
+
+textInvisible :: MonadIO m => Pixi.Text -> m ()
+textInvisible t = liftIO $ setProperty "visible" t (boolAsVal False)

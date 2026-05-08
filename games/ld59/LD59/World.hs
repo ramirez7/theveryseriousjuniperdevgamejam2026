@@ -75,4 +75,16 @@ newtype BGM = BGM { bgmAudio :: Maybe AudioBufferSourceNode }
   deriving (Semigroup, Monoid) via (First AudioBufferSourceNode)
 instance Component BGM where type Storage BGM = Global BGM
 
-makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling, ''BGM]
+newtype UIText = UIText Pixi.Text
+instance Component UIText where type Storage UIText = Map UIText
+
+data ScoreText = ScoreText
+instance Component ScoreText where type Storage ScoreText = Unique ScoreText
+
+data TitleText = TitleText
+instance Component TitleText where type Storage TitleText = Unique TitleText
+
+data GameOverText = GameOverText
+instance Component GameOverText where type Storage GameOverText = Unique GameOverText
+
+makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling, ''BGM, ''UIText, ''TitleText, ''ScoreText, ''GameOverText]

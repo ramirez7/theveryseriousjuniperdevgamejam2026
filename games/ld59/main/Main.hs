@@ -43,8 +43,8 @@ main = do
     pure x'
   initGameFonts
   pa <- initPlayArea app
-  scoreTxt <- initScoreText app
-  withEnv (Env art ac app pa scoreTxt) $ do
+  
+  withEnv (Env art ac app pa) $ do
     setScalingNearestNeighbor
     --appendToTarget "#canvas-container" app
     screen <- getProperty "screen" app
@@ -59,12 +59,13 @@ main = do
     runWith w $ do
       initBG
       initBorder
+      initScoreText
       liftIO $ do
-        -- foreground some stuff
-        addChild app scoreTxt
         addChild app pa
-      newEntity_ Title
       syncSnakeArt
+      initTitleText
+      initGameOverText
+      newEntity_ Title >> screenTransition Title
     
     callAddTicker gameTicker =<< jsFuncFromHs_
       (\_ -> runWith w $ do

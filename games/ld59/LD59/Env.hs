@@ -14,7 +14,6 @@ data Env = Env
   , envAudio :: Jfxr.AudioContext
   , envApp :: Pixi.Application
   , envPlayArea :: Pixi.Container
-  , envScore :: Pixi.Text
   }
 
 type HasEnv = (?env :: Env)

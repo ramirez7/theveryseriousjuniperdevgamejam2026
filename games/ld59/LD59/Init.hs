@@ -98,12 +98,32 @@ cleanupFood = cmapM $ \Food{..} -> do
   liftIO $ destroySprite (tailSprite foodStuff)
   pure (Nothing :: Maybe Food)
   
-initScoreText :: Pixi.Application -> IO Pixi.Text
-initScoreText app = do
-  txt <- newScoreText ""
-  setProperty "x" txt (intAsVal $ gameWidth `div` 2)
-  setProperty "y" txt (intAsVal $ tileSize `div` 2)
-  addChild app txt
-  pure txt
+initScoreText :: HasEnv => System World ()
+initScoreText = openEnv $ \Env{..} -> do
+  txt <- liftIO newScoreText
+  liftIO $ do
+    setProperty "x" txt (intAsVal $ gameWidth `div` 2)
+    setProperty "y" txt (intAsVal $ tileSize `div` 2)
+    addChild envApp txt
+    textInvisible txt
+  newEntity_ (ScoreText, UIText txt)
 
---initMainText :: Pixi.Application -> IO Pixi.Text
+initTitleText :: HasEnv => System World ()
+initTitleText = openEnv $ \Env{..} -> do
+  txt <- liftIO newTitleText
+  liftIO $ do
+    setProperty "x" txt (intAsVal $ gameWidth `div` 2)
+    setProperty "y" txt (intAsVal $ gameHeight `div` 2)
+    addChild envApp txt
+    textInvisible txt
+  newEntity_ (TitleText, UIText txt)
+
+initGameOverText :: HasEnv => System World ()
+initGameOverText = openEnv $ \Env{..} -> do
+  txt <- liftIO newGameOverText
+  liftIO $ do
+    setProperty "x" txt (intAsVal $ gameWidth `div` 2)
+    setProperty "y" txt (intAsVal $ gameHeight `div` 2)
+    addChild envApp txt
+    textInvisible txt
+  newEntity_ (GameOverText, UIText txt)
