@@ -89,6 +89,10 @@ pieceEase cutoff ef1 ef2 = \x -> if x < cutoff then ef1 (x / cutoff) else ef2 ((
 
 invEase :: Num a => Ease a -> Ease a
 invEase ef = \x -> ef (1 - x)
+-- TODO: Tune this (or throw it out)
+snakeMoveEase :: Ease Float
+snakeMoveEase = const 0 -- easy to remove it
+--snakeMoveEase = \x -> if x < 0.5 then 0else  expoIn x
 
 syncSnakeArt :: HasEnv => System World ()
 syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> do
@@ -99,18 +103,18 @@ syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> do
           DOWN -> (artHeadUp envArt, traverse_ Kleisli [mirrorSpriteV, unmirrorSpriteH])
           LEFT -> (artHeadSide envArt, traverse_ Kleisli [unmirrorSpriteH, unmirrorSpriteV])
           RIGHT -> (artHeadSide envArt, traverse_ Kleisli [mirrorSpriteH, unmirrorSpriteV])
-    off <- (dirV2f snakeHeadDir ^*) <$> (currSnakeRate >>= rateTweenM)
+    off <- (dirV2f snakeHeadDir ^*) . snakeMoveEase <$> (currSnakeRate >>= rateTweenM)
     Frame f <- Apecs.get global
     liftIO $ consoleLogVal (stringAsVal $ toJSString $ unwords ["head off", show off, "snake p", show snakeHeadPos, "f", show f])
     liftIO $ runKleisli headMirror headSprite
     liftIO $ setSpriteTexture headSprite headTex
-    liftIO $ setSpritePosOffset headSprite snakeHeadPos 0
+    liftIO $ setSpritePosOffset headSprite snakeHeadPos off
   let tailLocs = snakeLocateTail s
   let fullLocs = snakeHeadPos snakeHead : tailLocs
   for_ (zip3 (snakeLocateTail s) fullLocs (snakeTailSegs snakeTail)) $ \(tailPos, nextPos, SnakeTailSeg{..}) -> do
     let Tail{..} = snakeTailVal
     let moveV2 = fmap fromIntegral $ nextPos - tailPos
     liftIO $ rotateSprite tailSprite (unangle moveV2)
-    moveOff <- (moveV2 ^*) <$> (currSnakeRate >>= rateTweenM)
-    liftIO $ setSpritePosOffset tailSprite tailPos 0
+    moveOff <- (moveV2 ^*) . snakeMoveEase <$> (currSnakeRate >>= rateTweenM)
+    liftIO $ setSpritePosOffset tailSprite tailPos moveOff
     
