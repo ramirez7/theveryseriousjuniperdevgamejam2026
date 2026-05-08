@@ -134,7 +134,9 @@ tickSnake = openEnv $ \Env{..} -> everyFrameM (fmap snakeLevelRate snakeLevel) $
     let V2 hx hy = snakeHeadPos snakeHead
     let oob = hx < 0 || hy < 0 || hx > worldBounds ^. _x || hy > worldBounds ^. _y
     let onTail = snakeHeadPos snakeHead `elem` snakeLocateTail s
-    when (oob || onTail) $ cmapM $ \(_::Screen) -> switchBGM Dead >> pure Dead
+    when (oob || onTail) $ do
+      liftIO $ consoleLogVal $ stringAsVal $ toJSString $ unwords ["h", show (snakeHeadPos snakeHead), "t", show (snakeLocateTail s)]
+      cmapM $ \(_::Screen) -> switchBGM Dead >> pure Dead
   cmapM $ \case
     Scrambling 0 -> pure $ Nothing
     Scrambling n -> do

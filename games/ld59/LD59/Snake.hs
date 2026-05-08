@@ -12,6 +12,7 @@ import Data.Map qualified as Map
 import Linear.V2
 import Data.Foldable (toList, for_, traverse_)
 import Data.List (scanl')
+import Data.List.Extra (dropEnd)
 import Control.Lens
 import Safe (lastMay)
 import Apecs
@@ -45,7 +46,8 @@ data SnakeF h t = Snake
 
 snakeLocateTail :: SnakeF h t -> [V2 Int]
 snakeLocateTail Snake{..} =
-  drop 1 $ scanl' (\p dir -> p + (negate $ dirV2 dir)) (snakeHeadPos snakeHead) (snakeHeadDir snakeHead : fmap snakeTailDir (snakeTailSegs snakeTail))
+  -- Need to drop both ends here due to how scanl works
+  dropEnd 1 $ drop 1 $ scanl' (\p dir -> p + (negate $ dirV2 dir)) (snakeHeadPos snakeHead) (snakeHeadDir snakeHead : fmap snakeTailDir (snakeTailSegs snakeTail))
 
 snakeMatch :: Eq a => (t -> a) -> SnakeF h t -> (SnakeF h t, Maybe (SnakeTail t, a))
 snakeMatch f Snake{..} =
