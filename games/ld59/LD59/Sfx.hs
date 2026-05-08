@@ -40,7 +40,7 @@ clearSfx w =
 scrambleNoise :: HasEnv => JfxrDef
 scrambleNoise = openEnv $ \Env{..} ->
   artSinJfxr envArt &
-    withWaveform "whitenoise" &
+    withWaveform "pinknoise" &
     withDecay 1
 
 withNote :: Note -> Octave -> JfxrDef -> JfxrDef

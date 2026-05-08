@@ -77,8 +77,11 @@ animTail = everyFrame tailAnimRate $ do
 animScramble :: System World ()
 animScramble = everyFrame scrambleAnimRate $ do
   cmapM_ $ uncurry $ \(s::Snake) -> \case
-    Nothing -> for_ (snakeHead s) $ \Head{..} -> liftIO $ setProperty "angle" headSprite (intAsVal 0)
+    Nothing -> liftIO $ for_ (snakeHead s) $ \Head{..} -> do
+      setProperty "tint" headSprite (stringAsVal "white")
+      setProperty "angle" headSprite (intAsVal 0)
     Just (Scrambling{}) -> for_ (snakeHead s) $ \Head{..} -> liftIO $ do
+      setProperty "tint" headSprite (stringAsVal "pink")
       d <- valAsInt <$> getProperty "angle" headSprite
       setProperty "angle" headSprite (intAsVal $ d + scrambleTickDegrees)
 
@@ -97,7 +100,6 @@ foodPoints = 10
 tickSnake :: HasEnv => System World ()
 tickSnake = openEnv $ \Env{..} -> everyFrameM (fmap snakeLevelRate snakeLevel) $ do
   Frame f <- Apecs.get global
-  liftIO $ consoleLogVal (stringAsVal $ toJSString $ unwords ["snake move", "f", show f])
   cmap $ \(CurrentDir b, s::Snake) ->
     let currDir = snakeHeadDir (snakeHead s)
         (mDir, b') = unbuffer $ dropBufferWhile (`elem` [currDir, oppositeDir currDir]) b

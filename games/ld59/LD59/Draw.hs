@@ -105,7 +105,6 @@ syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> do
           RIGHT -> (artHeadSide envArt, traverse_ Kleisli [mirrorSpriteH, unmirrorSpriteV])
     off <- (dirV2f snakeHeadDir ^*) . snakeMoveEase <$> (currSnakeRate >>= rateTweenM)
     Frame f <- Apecs.get global
-    liftIO $ consoleLogVal (stringAsVal $ toJSString $ unwords ["head off", show off, "snake p", show snakeHeadPos, "f", show f])
     liftIO $ runKleisli headMirror headSprite
     liftIO $ setSpriteTexture headSprite headTex
     liftIO $ setSpritePosOffset headSprite snakeHeadPos off
