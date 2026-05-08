@@ -66,5 +66,5 @@ gateKeypress expectedCodes k e = do
       k
 
 setCurrentDir :: Dir -> System World ()
-setCurrentDir dir = cmap $ \(CurrentDir b) ->
+setCurrentDir dir = cmap $ \(CurrentDir b) -> 
   CurrentDir (buffer dir b)

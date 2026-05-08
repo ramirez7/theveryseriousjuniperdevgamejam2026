@@ -9,9 +9,10 @@ import Ease
 import LD59.Art
 import GHC.Wasm.Prim
 import LD59.Snake
-import Control.Monad (when)
+import Control.Monad (when, guard)
 import Control.Lens
 import LD59.Draw
+import LD59.Dir
 import LD59.Init
 import LD59.BGM
 import LD59.Wave
@@ -98,7 +99,8 @@ tickSnake = openEnv $ \Env{..} -> everyFrameM (fmap snakeLevelRate snakeLevel) $
   Frame f <- Apecs.get global
   liftIO $ consoleLogVal (stringAsVal $ toJSString $ unwords ["snake move", "f", show f])
   cmap $ \(CurrentDir b, s::Snake) ->
-    let (mDir, b') = unbuffer b
+    let currDir = snakeHeadDir (snakeHead s)
+        (mDir, b') = unbuffer $ dropBufferWhile (`elem` [currDir, oppositeDir currDir]) b
         dir = maybe (snakeHeadDir $ snakeHead s) id mDir
     in (snakeMove dir s, CurrentDir b')
   -- Check for match

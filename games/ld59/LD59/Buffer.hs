@@ -26,6 +26,10 @@ unbufferWhen p = \case
   Buffer [] -> (Nothing, Buffer [])
   Buffer (x:xs) | p x -> (Just x, Buffer xs)
   Buffer xs -> (Nothing, Buffer xs)
+
+dropBufferWhile :: (a -> Bool) -> Buffer n a -> Buffer n a
+dropBufferWhile p (Buffer xs) = Buffer (dropWhile p xs)
+
 peekbuffer :: Buffer n a -> Maybe a
 peekbuffer = \case
   Buffer [] -> Nothing
