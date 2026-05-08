@@ -9,6 +9,7 @@ import GHC.Wasm.Prim
 import Pixi.Types qualified as Pixi
 import Apecs
 import LD59.World
+import LD59.Text
 import Data.Function (on)
 import Safe (maximumMay, minimumByMay)
 import Data.Foldable (for_)
@@ -40,6 +41,7 @@ main = do
     appendCanvas x'
     resizeAppToScreen x'
     pure x'
+  initGameFonts
   pa <- initPlayArea app
   scoreTxt <- initScoreText app
   withEnv (Env art ac app pa scoreTxt) $ do

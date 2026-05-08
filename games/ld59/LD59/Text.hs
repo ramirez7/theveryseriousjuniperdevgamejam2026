@@ -4,17 +4,26 @@ module LD59.Text where
 import GHC.Wasm.Prim
 import Pixi.Types qualified as Pixi
 
+foreign import javascript safe
+  """
+  await Assets.load({
+    src: './PressStart2P-Regular.ttf',
+    data: { family: 'PressStart2P' }
+  });
+  """
+  initGameFonts :: IO ()
+
 foreign import javascript unsafe
   """
   const gameStyle = new PIXI.TextStyle({
-    fontFamily: 'Courier New',
+    fontFamily: 'PressStart2P',
     fontSize: 24,
     fill: 'white',
-    stroke: {
+/*    stroke: {
         color: 'black',
         width: 5
     },
-/*
+
     dropShadow: {
         color: 'black',
         blur: 4,
