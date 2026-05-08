@@ -67,7 +67,7 @@ newRandomFood waves p = do
 
 tickFoodSpawn :: HasEnv => System World ()
 tickFoodSpawn = everyFrame spawnRate $
-  listOpenCoords >>= randomFromList >>= newRandomFood [minBound..maxBound]
+  listOpenCoords >>= randomNFromList 3 >>= traverse_ (newRandomFood [minBound..maxBound])
 
 animTail :: System World ()
 animTail = everyFrame tailAnimRate $ do

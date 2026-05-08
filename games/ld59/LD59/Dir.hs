@@ -4,9 +4,10 @@
 module LD59.Dir where
 
 import Linear.V2
+import Linear (signorm)
 
 data Dir = UP | DOWN | LEFT | RIGHT
-  deriving stock (Show, Eq)
+  deriving stock (Show, Eq, Ord, Enum, Bounded)
 
 oppositeDir :: Dir -> Dir
 oppositeDir = \case
@@ -24,3 +25,22 @@ dirV2 = \case
 
 dirV2f :: Dir -> V2 Float
 dirV2f = fmap fromIntegral . dirV2
+
+-- | Convert degrees to radians
+degToRad :: Float -> Float
+degToRad d      = d * pi / 180
+{-# INLINE degToRad #-}
+
+-- | Convert radians to degrees
+radToDeg :: Float -> Float
+radToDeg r      = r * 180 / pi
+{-# INLINE radToDeg #-}
+
+-- 
+v2Dir :: V2 Float -> Float -> Maybe Dir
+v2Dir v tolDeg =
+  let vdeg = radToDeg (unangle v)
+      withinVdeg x = abs (vdeg - x) < tolDeg
+  in case filter (withinVdeg . radToDeg . unangle . dirV2f) [minBound..] of
+    [dir] -> Just dir
+    _ -> Nothing

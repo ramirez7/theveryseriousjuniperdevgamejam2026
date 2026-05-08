@@ -12,7 +12,7 @@ data Rate = Rate
   } deriving Show
 
 snakeRate :: Rate
-snakeRate = Rate 24 0
+snakeRate = Rate 18 0
 
 tailAnimRate :: Rate
 tailAnimRate = Rate 10 0
@@ -27,7 +27,7 @@ scrambleTickDegrees :: Int
 scrambleTickDegrees = 30
 
 spawnRate :: Rate
-spawnRate = Rate (5 * 60) 25
+spawnRate = Rate (3 * 60) 25
 
 everyFrameM :: System World Rate -> System World () -> System World ()
 everyFrameM mr f = mr >>= flip everyFrame f
