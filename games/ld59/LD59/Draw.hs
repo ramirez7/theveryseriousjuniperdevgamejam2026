@@ -91,8 +91,9 @@ invEase :: Num a => Ease a -> Ease a
 invEase ef = \x -> ef (1 - x)
 -- TODO: Tune this (or throw it out)
 snakeMoveEase :: Ease Float
-snakeMoveEase = const 0 -- easy to remove it
---snakeMoveEase = \x -> if x < 0.5 then 0else  expoIn x
+snakeMoveEase = (* 0.75) . subtract 0.25
+--snakeMoveEase = const 0 -- easy to remove it
+--snakeMoveEase = \x -> if x < 0.5 then 0 else  expoIn x
 
 syncSnakeArt :: HasEnv => System World ()
 syncSnakeArt = openEnv $ \Env{..} -> cmapM_ $ \(s@Snake{..} :: Snake) -> do
