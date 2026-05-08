@@ -40,7 +40,11 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
   bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
 
-  bindTouchDoubleTap w (gateScreen Title $ screenTransition Playing)
+  bindTouchDoubleTap w $ gateScreen Title $ do
+    screenTransition Tutorial
+    -- HACK
+    liftIO $ bindTouchDoubleTap w $ gateScreen Tutorial $ screenTransition Playing
+
   bindTouchDoubleTap w (gateScreen Dead $ screenTransition Playing)
   bindTouchSwipe w (traverse_ setCurrentDir . v2Dir 45)
   bindTouchTwoFingerTap w $ gateScreen Playing $ do
@@ -51,7 +55,11 @@ handleInput w = openEnv $ \Env{..} -> do
     cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
       playJfxr scrambleNoise
       pure $ Scrambling 3
-  bindKey w Title ["Enter"] $ screenTransition Playing
+  bindKey w Title ["Enter"] $ do
+    screenTransition Tutorial
+    -- HACK
+    liftIO $ bindKey w Tutorial ["Enter"] $ screenTransition Playing
+  
   bindKey w Dead ["Enter"] $ screenTransition Playing
 
 bindKey :: World -> Screen -> [String] -> System World () -> IO ()

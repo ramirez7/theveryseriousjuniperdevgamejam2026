@@ -127,3 +127,23 @@ initGameOverText = openEnv $ \Env{..} -> do
     addChild envApp txt
     textInvisible txt
   newEntity_ (GameOverText, UIText txt)
+
+initPressStartText :: HasEnv => System World ()
+initPressStartText = openEnv $ \Env{..} -> do
+  txt <- liftIO newPressStartText
+  liftIO $ do
+    setProperty "x" txt (intAsVal $ gameWidth `div` 2)
+    setProperty "y" txt (intAsVal $ (gameHeight `div` 2) + 100)
+    addChild envApp txt
+    textInvisible txt
+  newEntity_ (PressStartText, UIText txt)
+
+initTutorialText :: HasEnv => System World ()
+initTutorialText = openEnv $ \Env{..} -> do
+  txt <- liftIO newTutorialText
+  liftIO $ do
+    setProperty "x" txt (intAsVal $ gameWidth `div` 2)
+    setProperty "y" txt (intAsVal $ gameHeight `div` 2)
+    addChild envApp txt
+    textInvisible txt
+  newEntity_ (TutorialText, UIText txt)
