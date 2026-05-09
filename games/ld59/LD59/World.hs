@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE DerivingStrategies #-}
@@ -10,15 +11,27 @@ import Data.Word (Word64)
 import Pixi.Types qualified as Pixi
 import LD59.Snake
 import LD59.Dir
-import Data.Monoid (Sum (..))
+import Data.Monoid (Sum (..), First (..))
 import Linear.V2
 import LD59.Wave
+import LD59.Buffer
+import LD59.Jfxr.JSFFI (AudioBufferSourceNode)
 
 data Screen = Title | Playing | Dead deriving stock (Show, Eq)
 
 instance Component Screen where type Storage Screen = Unique Screen
 
-newtype CurrentDir = CurrentDir Dir deriving stock (Show)
+newtype BG = BG { bgSprite :: Maybe Pixi.Sprite }
+  deriving (Semigroup, Monoid) via (First Pixi.Sprite)
+
+instance Component BG where type Storage BG = Global BG
+
+newtype Border = Border { borderSprites :: [Pixi.Sprite] }
+  deriving (Semigroup, Monoid) via ([Pixi.Sprite])
+
+instance Component Border where type Storage Border = Global Border
+
+newtype CurrentDir = CurrentDir (Buffer 3 Dir) deriving stock (Show)
 instance Component CurrentDir where type Storage CurrentDir = Unique CurrentDir
 
 data Head = Head
@@ -38,12 +51,40 @@ data Food = Food
 
 instance Component Food where type Storage Food = Map Food
 
-newtype Frame = Frame Word64
+newtype Scrambling = Scrambling Word64
   deriving stock (Show)
+  deriving newtype (Enum, Bounded, Num)
+
+instance Component Scrambling where type Storage Scrambling = Unique Scrambling
+
+newtype Frame = Frame Word64
+  deriving stock (Eq, Ord, Show)
   deriving newtype (Enum, Bounded, Num)
   deriving (Semigroup, Monoid) via (Sum Frame)
 
 instance Component Frame where type Storage Frame = Global Frame
 
+newtype Score = Score { rawScore :: Word64 }
+  deriving stock (Show)
+  deriving newtype (Enum, Bounded, Num)
+  deriving (Semigroup, Monoid) via (Sum Score)
 
-makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food]
+instance Component Score where type Storage Score = Global Score
+
+newtype BGM = BGM { bgmAudio :: Maybe AudioBufferSourceNode }
+  deriving (Semigroup, Monoid) via (First AudioBufferSourceNode)
+instance Component BGM where type Storage BGM = Global BGM
+
+newtype UIText = UIText Pixi.Text
+instance Component UIText where type Storage UIText = Map UIText
+
+data ScoreText = ScoreText
+instance Component ScoreText where type Storage ScoreText = Unique ScoreText
+
+data TitleText = TitleText
+instance Component TitleText where type Storage TitleText = Unique TitleText
+
+data GameOverText = GameOverText
+instance Component GameOverText where type Storage GameOverText = Unique GameOverText
+
+makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling, ''BGM, ''UIText, ''TitleText, ''ScoreText, ''GameOverText]

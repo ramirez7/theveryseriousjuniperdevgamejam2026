@@ -2,11 +2,8 @@ import "./pixi-export.js"
 
 async function newClip(s) {
     return new Promise((resolve, reject) => {
-        console.log("newClip() START");
         var synth = new jfxr.Synth(s);
         synth.run(function(clip) {
-            console.log("newClip() DONE!");
-            console.log(clip === undefined);
             resolve(clip);
         });
     });
@@ -23,6 +20,7 @@ async function fetchText(s) {
 }
 
 window.newClip = newClip;
+window.fetchText = fetchText;
 
 import wasm_init from "./wasm-init.js"
 wasm_init({

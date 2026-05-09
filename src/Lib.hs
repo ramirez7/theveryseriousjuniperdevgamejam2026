@@ -36,6 +36,30 @@ foreign import javascript unsafe "Math.random()"
 foreign import javascript unsafe "new PIXI.Application()"
    newApp :: IO Pixi.Application
 
+foreign import javascript unsafe "new PIXI.Application({ width: $1, height: $2 })"
+   newAppSized :: Int -> Int -> IO Pixi.Application
+
+foreign import javascript unsafe
+  """
+  function resize() {
+    const app = $1;
+    const appWidth = app.screen.width;
+    const appHeight = app.screen.height;
+    console.log("wiw", window.innerWidth, "aw", appWidth, "wih", window.innerHeight, "ah", appHeight);
+    const scale = Math.min(window.innerWidth / appWidth, window.innerHeight / appHeight);
+    console.log("scale", scale);
+    app.stage.scale.set(scale);
+    app.stage.position.set(
+        (window.innerWidth - appWidth * scale) / 2,
+        (window.innerHeight - appHeight * scale) / 2
+    );
+    app.renderer.resize(window.innerWidth, window.innerHeight);
+}
+  window.addEventListener('resize', resize);
+  resize();
+  """
+  resizeAppToScreen :: Pixi.Application -> IO ()
+
 -- | Creates a new PIXI.js Text object with the specified text and fill color.
 --
 -- @param text The text content to display
@@ -43,6 +67,20 @@ foreign import javascript unsafe "new PIXI.Application()"
 -- @return A new Text object
 foreign import javascript unsafe "new PIXI.Text({text: $1, style: {fill: $2 }})"
    newText :: JSString -> JSString -> IO Pixi.Text
+
+foreign import javascript unsafe
+  """
+  new PIXI.Text({
+    text: $1,
+    style: {
+      fill: $2,
+      fontFamily: $3,
+      fontSize: $4,
+      align: $5
+    }
+  })
+  """
+   newTextCustom :: JSString -> JSString -> JSString -> Int -> JSString -> IO Pixi.Text
 
 -- | Initializes a PIXI.js Application with the given background color.
 --
@@ -59,6 +97,14 @@ foreign import javascript safe
   return $1
  """
  initApp :: JSVal -> JSString -> IO JSVal
+
+-- TODO: JSFFI is weird with await..why do we need to do this return stuff?
+foreign import javascript safe
+  """
+  const r = await $1.init({width: $2, height: $3, antialias: false, autoDensity: true})
+  return $1
+  """
+  initAppSized :: Pixi.Application -> Int -> Int -> IO Pixi.Application
 
 -- | Initializes a PIXI.js Application with the given background color and resizes it to a target element.
 --
@@ -94,6 +140,9 @@ foreign import javascript unsafe "document.body.appendChild($1.canvas)"
 foreign import javascript unsafe "document.querySelector($1).appendChild($2.canvas)"
     appendToTarget :: JSString -> Pixi.Application -> IO ()
 
+foreign import javascript unsafe "PIXI.TexturePool.textureOptions.scaleMode = 'nearest'"
+  setScalingNearestNeighbor :: IO ()
+
 -- *****************************************************************************
 -- * Console Logging
 -- *****************************************************************************
@@ -112,6 +161,8 @@ foreign import javascript unsafe "console.log($1)"
 consoleLogShow :: Show a => a -> IO ()
 consoleLogShow = consoleLogVal . stringAsVal . toJSString . show
 
+consoleLogStr :: String -> IO ()
+consoleLogStr = consoleLogVal . stringAsVal . toJSString
 -- *****************************************************************************
 -- * Asset Loading
 -- *****************************************************************************
@@ -137,6 +188,24 @@ foreign import javascript unsafe "new PIXI.Sprite($1)"
 
 foreign import javascript unsafe "$1.destroy()"
   destroySprite :: Pixi.Sprite -> IO ()
+
+foreign import javascript unsafe """
+new PIXI.TilingSprite({
+  texture: $1,
+  width: $2,
+  height: $3,
+})
+"""
+  newTilingSprite :: Pixi.Texture -> Int -> Int -> IO Pixi.Sprite
+
+foreign import javascript unsafe "new PIXI.Container()"
+  newContainer :: IO Pixi.Container
+
+foreign import javascript unsafe "$1.addChild($2)"
+    addContainerChild' :: Pixi.Container -> JSVal -> IO ()
+
+addContainerChild :: IsJSVal a => Pixi.Container -> a -> IO ()
+addContainerChild app a = addContainerChild' app (coerce a)
 
 -- | Gets a base texture from PIXI's built-in texture cache.
 --
@@ -300,8 +369,8 @@ setPropertyKey keys obj value =
 foreign import javascript "$2[$1] = $3"
   setProperty' ::  JSString -> JSVal -> JSVal -> IO ()
 
-setProperty :: IsJSVal a => JSString -> a -> JSVal -> IO ()
-setProperty p o v = setProperty' p (coerce o) v
+setProperty :: (IsJSVal a, IsJSVal b) => JSString -> a -> b -> IO ()
+setProperty p o v = setProperty' p (coerce o) (coerce v)
 
 -- *****************************************************************************
 -- * Type Conversion Functions
@@ -375,3 +444,20 @@ addEventListener e o l = addEventListener' e (coerce o) l
 
 foreign import javascript unsafe "window.addEventListener($1, $2)"
   addWindowEventListener :: JSString -> JSFunction -> IO ()
+
+foreign import javascript unsafe "document.addEventListener($1, $2)"
+  addDocumentEventListener :: JSString -> JSFunction -> IO ()
+
+addDocumentEventListenerHs :: JSString -> (JSVal -> IO ()) -> IO ()
+addDocumentEventListenerHs e f = jsFuncFromHs_ f >>= addDocumentEventListener e
+foreign import javascript unsafe "$1.touches[0]"
+  getEventTouch :: JSVal -> IO JSVal
+
+foreign import javascript unsafe "$1.changedTouches[0]"
+  getEventChangedTouch :: JSVal -> IO JSVal
+
+foreign import javascript unsafe "$1.changedTouches.length"
+  getEventChangedTouchNum :: JSVal -> IO Int
+
+foreign import javascript unsafe "new Date().getTime()"
+  jsGetTime :: IO JSVal

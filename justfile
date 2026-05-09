@@ -4,8 +4,14 @@ cabal-update:
 repl exe:
      wasm32-wasi-cabal repl exe:{{exe}}
 
-lib-repl:
-    wasm32-wasi-cabal repl --enable-multi-repl pixi-js jsffi-typed
+lib-repl libs="pixi-js jsffi-typed":
+    wasm32-wasi-cabal repl --enable-multi-repl {{libs}}
+
+all-repl:
+    wasm32-wasi-cabal repl --enable-multi-repl all
+
+ghciwatch:
+    ghciwatch --command "wasm32-wasi-cabal repl --enable-multi-repl all" $(fd .hs --exec echo -n "--watch {//} ")
 
 build exe:
     wasm32-wasi-cabal build exe:{{exe}}
@@ -28,11 +34,15 @@ serve exe: (bundle exe 'ln -sr')
 
 # UNTESTED
 zip exe: (bundle exe)
-    zip -rj ld59-prep.zip bundles/ld59-prep/*
-    zip -d ld59-prep.zip '*~'
+    zip -rj {{exe}}.zip bundles/{{exe}}/*
+    zip -d {{exe}}.zip '*~'
 
 gild:
     fd .cabal --exec cabal-gild --io={}
 
 mv-jfxr:
     mv ~/Downloads/*.jfxr static/ld59/
+
+gen-jfxr-types:
+    echo -e 'jsonTypeGenIO "static/ld59/Default 1.jfxr" "games/ld59/LD59/Jfxr/Types.hs" "LD59.Jfxr.Types" "JfxrDef" "jfxr"\n:q' | \
+    wasm32-wasi-cabal repl json-type-gen

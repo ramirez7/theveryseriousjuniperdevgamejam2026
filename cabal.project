@@ -2,3 +2,9 @@ allow-newer: apecs:containers
 packages:
         .
         ./lib/*
+
+source-repository-package
+    type: git
+    location: https://gitlab.com/macaroni.dev/Ease.git
+    tag: d28b7049fdc84b8807f1a2e7992c1275848ce254
+    --sha256: sha256-2UbpA9U/RtSOX1WKMKrmPHyB6sIiGqhwoPTX1TC0O9c=

@@ -31,8 +31,17 @@ source-repository head
   location: https://github.com/Tritlo/wasm-game.git
 
 common warnings
-  ghc-options: -Wall
+  ghc-options:
+    -Wall
+    -Werror=incomplete-patterns
+
   cc-options: -Wnomain-return-type
+
+common wasm-export
+  ghc-options:
+    -no-hs-main
+    -optl-mexec-model=reactor
+    "-optl-Wl,--export=wasmMain"
 
 library
   hs-source-dirs: src
@@ -66,34 +75,16 @@ executable ld59-prep
     safe,
     test
 
-executable ld59
+common ld59-shared
   import: warnings
-  hs-source-dirs: games/ld59
-  main-is: Main.hs
   default-language: GHC2021
-  ghc-options:
-    -no-hs-main
-    -optl-mexec-model=reactor
-    "-optl-Wl,--export=wasmMain"
-
-  -- cabal-gild: discover games/ld59 --exclude=games/ld59/Main.hs
-  other-modules:
-    LD59.Controls
-    LD59.Dir
-    LD59.Draw
-    LD59.Init
-    LD59.Jfxr.JSFFI
-    LD59.Screen
-    LD59.Snake
-    LD59.Tick
-    LD59.Wave
-    LD59.World
-
   build-depends:
     aeson,
     apecs,
     base,
+    bytestring,
     containers,
+    ease,
     extra,
     generic-lens,
     ghc-experimental,
@@ -101,7 +92,43 @@ executable ld59
     lens-aeson,
     linear,
     safe,
+    scientific,
     test
+
+library ld59-lib
+  import: ld59-shared
+  hs-source-dirs: games/ld59
+  -- cabal-gild: discover games/ld59 --exclude=games/ld59/Main.hs
+  exposed-modules:
+    LD59.Art
+    LD59.BGM
+    LD59.Buffer
+    LD59.Controls
+    LD59.Debug
+    LD59.Dir
+    LD59.Draw
+    LD59.Env
+    LD59.Init
+    LD59.Jfxr.JSFFI
+    LD59.Jfxr.Types
+    LD59.Level
+    LD59.Random
+    LD59.Rate
+    LD59.Score
+    LD59.Screen
+    LD59.Sfx
+    LD59.Snake
+    LD59.Text
+    LD59.Tick
+    LD59.Wave
+    LD59.World
+
+executable ld59
+  import: ld59-shared, wasm-export
+  hs-source-dirs: games/ld59/main
+  main-is: Main.hs
+  build-depends:
+    test:ld59-lib
 
 executable test
   -- Import common warning flags.
@@ -128,3 +155,13 @@ executable test
     -no-hs-main
     -optl-mexec-model=reactor
     "-optl-Wl,--export=wasmMain"
+
+library json-type-gen
+  hs-source-dirs: scripts/json-type-gen
+  -- cabal-gild: discover scripts/json-type-gen
+  exposed-modules: JsonTypeGen
+  default-language: GHC2021
+  build-depends:
+    aeson,
+    base,
+    containers
