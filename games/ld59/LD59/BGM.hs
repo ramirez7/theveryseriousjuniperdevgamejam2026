@@ -15,6 +15,7 @@ switchBGM screen = openEnv $ \Env{..} -> do
   let toPlay = case screen of
         Title -> Nothing
         Playing -> Just (artPlayingBGM envArt)
+        Tutorial -> Just (artGameoverBGM envArt)
         Dead -> Just (artGameoverBGM envArt)
 
   bgm <- liftIO $ traverse (Jfxr.loopAudioBuffer envAudio) toPlay

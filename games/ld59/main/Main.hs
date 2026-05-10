@@ -65,6 +65,8 @@ main = do
       syncSnakeArt
       initTitleText
       initGameOverText
+      initPressStartText
+      initTutorialText
       newEntity_ Title >> screenTransition Title
     
     callAddTicker gameTicker =<< jsFuncFromHs_

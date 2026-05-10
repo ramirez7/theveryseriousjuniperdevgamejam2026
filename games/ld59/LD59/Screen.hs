@@ -37,18 +37,28 @@ screenTransition next = cmapM $ \(curr::Screen) -> do
 
 screenCleanup :: HasEnv => Screen -> System World ()
 screenCleanup = \case
-  Title -> onText @TitleText textInvisible    
+  Title -> do
+    onText @TitleText textInvisible
+    onText @PressStartText textInvisible
+  Tutorial -> onText @TutorialText textInvisible
   Playing -> pure ()
-  Dead -> onText @GameOverText textInvisible
+  Dead -> do
+    onText @GameOverText textInvisible
+    onText @PressStartText textInvisible
 
 screenInit :: HasEnv => Screen -> System World ()
 screenInit = \case
-  Title -> onText @TitleText textVisible
+  Title -> do
+    onText @TitleText textVisible
+    onText @PressStartText textVisible
+  Tutorial -> onText @TutorialText textVisible
   Playing -> do
     updateScore (const (Score 0))
     onText @ScoreText textVisible
     cleanupSnake
     cleanupFood
     initGame
-  Dead -> onText @GameOverText textVisible
+  Dead -> do
+    onText @GameOverText textVisible
+    onText @PressStartText textVisible
     

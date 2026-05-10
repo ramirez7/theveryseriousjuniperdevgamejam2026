@@ -17,7 +17,7 @@ import LD59.Wave
 import LD59.Buffer
 import LD59.Jfxr.JSFFI (AudioBufferSourceNode)
 
-data Screen = Title | Playing | Dead deriving stock (Show, Eq)
+data Screen = Title | Tutorial | Playing | Dead deriving stock (Show, Eq)
 
 instance Component Screen where type Storage Screen = Unique Screen
 
@@ -87,4 +87,27 @@ instance Component TitleText where type Storage TitleText = Unique TitleText
 data GameOverText = GameOverText
 instance Component GameOverText where type Storage GameOverText = Unique GameOverText
 
-makeWorld "World" [''Snake, ''CurrentDir, ''Frame, ''Screen, ''Food, ''BG, ''Border, ''Score, ''Scrambling, ''BGM, ''UIText, ''TitleText, ''ScoreText, ''GameOverText]
+data PressStartText = PressStartText
+instance Component PressStartText where type Storage PressStartText = Unique PressStartText
+
+data TutorialText = TutorialText
+instance Component TutorialText where type Storage TutorialText = Unique TutorialText
+
+makeWorld "World"
+  [ ''Snake
+  , ''CurrentDir
+  , ''Frame
+  , ''Screen
+  , ''Food
+  , ''BG
+  , ''Border
+  , ''Score
+  , ''Scrambling
+  , ''BGM
+  , ''UIText
+  , ''TitleText
+  , ''ScoreText
+  , ''GameOverText
+  , ''PressStartText
+  , ''TutorialText
+  ]

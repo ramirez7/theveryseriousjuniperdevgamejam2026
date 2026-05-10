@@ -461,3 +461,6 @@ foreign import javascript unsafe "$1.changedTouches.length"
 
 foreign import javascript unsafe "new Date().getTime()"
   jsGetTime :: IO JSVal
+
+foreign import javascript unsafe "('ontouchstart' in window) || (navigator.maxTouchPoints > 0)"
+  isTouchDevice :: IO Bool
