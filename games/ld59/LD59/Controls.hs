@@ -10,6 +10,7 @@ module LD59.Controls where
 import LD59.World
 import LD59.Buffer
 import LD59.BGM
+import Data.List (sort)
 import LD59.Art
 import Data.Foldable (traverse_)
 import GHC.Wasm.Prim
@@ -52,7 +53,7 @@ handleInput w = openEnv $ \Env{..} -> do
         cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
           playJfxr scrambleNoise
           pure $ Scrambling 3
-    Swipe sv -> traverse_ setCurrentDir (v2Dir 45 sv)
+    Swipe sv -> resolveCurrentDir (v2Dir 60 sv)
 
   bindKey w Playing ["Space"] $ do
     cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
@@ -80,6 +81,16 @@ gateKeypress expectedCodes k e = do
     when (kcode `elem` expectedCodes) $ do
       k
 
+resolveCurrentDir :: [Dir] -> System World ()
+resolveCurrentDir dirs = cmap $ \(CurrentDir b) ->
+  let resolveConflicts = take 1 . sort
+      validDirs = case peekbufferLast b of
+        Nothing -> dirs
+        Just x -> filter (dirIsTurn x) dirs 
+  in case resolveConflicts validDirs of
+    [dir] -> CurrentDir (buffer dir b)
+    _ -> CurrentDir b
+
 setCurrentDir :: Dir -> System World ()
 setCurrentDir dir = cmap $ \(CurrentDir b) -> 
   CurrentDir (buffer dir b)
@@ -91,8 +102,8 @@ data TouchInput =
 
 bindTouchControls :: World -> (TouchInput -> System World ()) -> IO ()
 bindTouchControls w f = do
-  let swipeThreshold = 20 -- px
-  let tapThreshold = 300 -- ms
+  let swipeThreshold = 5 -- px should this be smaller still?
+  let tapThreshold = 300 -- ms..todo make this a maybe?
 
   startRef <- liftIO $ newIORef (V2 0 0)
   lastTapRef <- liftIO $ newIORef 0

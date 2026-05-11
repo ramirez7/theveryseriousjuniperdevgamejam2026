@@ -9,6 +9,10 @@ import Linear (signorm)
 data Dir = UP | DOWN | LEFT | RIGHT
   deriving stock (Show, Eq, Ord, Enum, Bounded)
 
+
+dirIsTurn :: Dir -> Dir -> Bool
+dirIsTurn curr next = next `notElem` [curr, oppositeDir curr]
+
 oppositeDir :: Dir -> Dir
 oppositeDir = \case
   UP -> DOWN
@@ -37,10 +41,8 @@ radToDeg r      = r * 180 / pi
 {-# INLINE radToDeg #-}
 
 -- 
-v2Dir :: Float -> V2 Float -> Maybe Dir
+v2Dir :: Float -> V2 Float -> [Dir]
 v2Dir tolDeg v =
   let vdeg = radToDeg (unangle v)
       withinVdeg x = abs (vdeg - x) < tolDeg
-  in case filter (withinVdeg . radToDeg . unangle . dirV2f) [minBound..] of
-    [dir] -> Just dir
-    _ -> Nothing
+  in filter (withinVdeg . radToDeg . unangle . dirV2f) [minBound..]
