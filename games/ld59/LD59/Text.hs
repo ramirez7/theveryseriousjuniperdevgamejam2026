@@ -111,6 +111,7 @@ foreign import javascript unsafe
   - Collect waves to grow your signal-chain.
   - Match 3 waves to clear them from your signal-chain
   - Don't collide with your signal-chain or the wall!
+  - "Scramble" waves you don't want into new ones.
 
   CONTROLS:
   Keyboard:
@@ -119,7 +120,7 @@ foreign import javascript unsafe
 
   Mobile:
   - Swipe to Change Direction
-  - Two-finger Press to "Scramble"
+  - Double-tap to "Scramble"
 
 
   `
