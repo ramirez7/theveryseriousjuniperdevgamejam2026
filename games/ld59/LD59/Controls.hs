@@ -46,15 +46,18 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
   bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
 
-  addEventListenerHs "doubletap" envHammer $ \_ -> runWith w $ Apecs.get global >>= \case
-    Title -> screenTransition Tutorial
-    Tutorial ->screenTransition Playing
-    Dead -> screenTransition Playing
-    Playing -> do
-      cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
-        playJfxr scrambleNoise
-        pure $ Scrambling 3
-  addEventListenerHs "swipe" envHammer $ \e -> do
+  addEventListenerHs "doubletap" envHammer $ \e -> do
+    preventDefault e
+    runWith w $ Apecs.get global >>= \case
+      Title -> screenTransition Tutorial
+      Tutorial ->screenTransition Playing
+      Dead -> screenTransition Playing
+      Playing -> do
+        cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
+          playJfxr scrambleNoise
+          pure $ Scrambling 3
+  addEventListenerHs "pan" envHammer $ \e -> do
+    preventDefault e
     mDir <- dirFromHammerEvent e
     for_ mDir $ \swipeDir -> do
       consoleLogStr $ "SWIPE " ++ show swipeDir

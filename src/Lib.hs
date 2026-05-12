@@ -477,6 +477,10 @@ foreign import javascript unsafe
   """
   const h = new Hammer($1, { touchAction: 'none'});
   h.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+  h.get('pan').set({ direction: Hammer.DIRECTION_ALL, threshold: 20 });
   return h;
   """
   newDefaultHammer :: JSVal -> IO Hammer.Manager
+
+foreign import javascript unsafe "$1.preventDefault()"
+  preventDefault :: JSVal -> IO ()
