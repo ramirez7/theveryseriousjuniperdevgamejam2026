@@ -1,14 +1,28 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE NegativeLiterals #-}
 module LD59.Dir where
 
 import Linear.V2
 import Linear (signorm)
+import Lib
+import GHC.Wasm.Prim
 
 data Dir = UP | DOWN | LEFT | RIGHT
   deriving stock (Show, Eq, Ord, Enum, Bounded)
 
+
+dirFromHammerEvent :: JSVal -> IO (Maybe Dir)
+dirFromHammerEvent = fmap dirFromHammer . getProperty "direction"
+  
+dirFromHammer :: JSVal -> Maybe Dir
+dirFromHammer j = case valAsInt j of
+  2 -> Just LEFT
+  4 -> Just RIGHT
+  8 -> Just UP
+  16 -> Just DOWN
+  _ -> Nothing
 
 dirIsTurn :: Dir -> Dir -> Bool
 dirIsTurn curr next = next `notElem` [curr, oppositeDir curr]

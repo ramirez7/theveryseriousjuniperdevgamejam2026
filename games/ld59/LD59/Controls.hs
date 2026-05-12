@@ -11,6 +11,7 @@ import LD59.World
 import LD59.Buffer
 import LD59.BGM
 import Data.List (sort)
+import Data.Foldable (for_)
 import LD59.Art
 import Data.Foldable (traverse_)
 import GHC.Wasm.Prim
@@ -22,6 +23,7 @@ import Control.Monad.IO.Class
 import Data.Coerce
 import LD59.Screen
 import Pixi.Types qualified as Pixi
+import Hammer.Types qualified as Hammer
 import LD59.Draw
 import LD59.Wave
 import LD59.Init
@@ -44,7 +46,20 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
   bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
 
-  bindTouchControls w $ \case
+  addEventListenerHs "doubletap" envHammer $ \_ -> runWith w $ Apecs.get global >>= \case
+    Title -> screenTransition Tutorial
+    Tutorial ->screenTransition Playing
+    Dead -> screenTransition Playing
+    Playing -> do
+      cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
+        playJfxr scrambleNoise
+        pure $ Scrambling 3
+  addEventListenerHs "swipe" envHammer $ \e -> do
+    mDir <- dirFromHammerEvent e
+    for_ mDir $ \swipeDir -> do
+      consoleLogStr $ "SWIPE " ++ show swipeDir
+      runWith w $ setCurrentDir swipeDir
+{-  bindTouchControls w $ \case
     DoubleTap -> Apecs.get global >>= \case
       Title -> screenTransition Tutorial
       Tutorial ->screenTransition Playing
@@ -54,7 +69,7 @@ handleInput w = openEnv $ \Env{..} -> do
           playJfxr scrambleNoise
           pure $ Scrambling 3
     Swipe sv -> resolveCurrentDir (v2Dir 60 sv)
-
+-}
   bindKey w Playing ["Space"] $ do
     cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
       playJfxr scrambleNoise
