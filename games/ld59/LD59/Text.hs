@@ -109,15 +109,15 @@ foreign import javascript unsafe
   const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
   const tags = {
-    red: { fill: 'red' },
-    blue: { fill: 'blue' }
+    pink: { fill: 'hotpink' }
   };
+  const scramble = '<pink>"Scramble"</pink>'
   const goal = `
 GOAL:
 - Collect waves to grow your signal-chain.
 - Match 3 waves to clear them from your signal-chain
 - Don't collide with your signal-chain or the wall!
-- <red>"Scramble"</red> waves you don't want into new ones.
+- ${scramble} waves you don't want into new ones.
 `;
   var controls;
   if (isMobile) {
@@ -125,14 +125,14 @@ GOAL:
 CONTROLS:
 Mobile:
 - Swipe to Change Direction
-- Double-tap to "Scramble"
+- Double-tap to ${scramble}
 `;
   } else {
     controls = `
 CONTROLS:
 Keyboard:
 - WASD or Arrow Keys to Change Direction
-- Space to "Scramble"
+- Space to ${scramble}
 `;
   }
 
