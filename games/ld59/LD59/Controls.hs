@@ -1,4 +1,6 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE MultilineStrings #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -8,6 +10,8 @@ module LD59.Controls where
 import LD59.World
 import LD59.Buffer
 import LD59.BGM
+import Data.List (sort)
+import Data.Foldable (for_)
 import LD59.Art
 import Data.Foldable (traverse_)
 import GHC.Wasm.Prim
@@ -19,6 +23,7 @@ import Control.Monad.IO.Class
 import Data.Coerce
 import LD59.Screen
 import Pixi.Types qualified as Pixi
+import Hammer.Types qualified as Hammer
 import LD59.Draw
 import LD59.Wave
 import LD59.Init
@@ -27,6 +32,7 @@ import LD59.Score
 import LD59.Sfx
 import Data.IORef
 import Linear.V2
+import Linear (norm)
 
 jfxrStr :: JSString
 jfxrStr = toJSString """
@@ -40,17 +46,33 @@ handleInput w = openEnv $ \Env{..} -> do
   bindKeyDir w Playing ["KeyA", "ArrowLeft"] LEFT
   bindKeyDir w Playing ["KeyD", "ArrowRight"] RIGHT
 
-  bindTouchDoubleTap w $ gateScreen Title $ do
-    screenTransition Tutorial
-    -- HACK
-    liftIO $ bindTouchDoubleTap w $ gateScreen Tutorial $ screenTransition Playing
-
-  bindTouchDoubleTap w (gateScreen Dead $ screenTransition Playing)
-  bindTouchSwipe w (traverse_ setCurrentDir . v2Dir 45)
-  bindTouchTwoFingerTap w $ gateScreen Playing $ do
-    cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
-      playJfxr scrambleNoise
-      pure $ Scrambling 3
+  addEventListenerHs "doubletap" envHammer $ \e -> do
+    preventDefault e
+    runWith w $ Apecs.get global >>= \case
+      Title -> screenTransition Tutorial
+      Tutorial ->screenTransition Playing
+      Dead -> screenTransition Playing
+      Playing -> do
+        cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
+          playJfxr scrambleNoise
+          pure $ Scrambling 3
+  addEventListenerHs "pan" envHammer $ \e -> do
+    preventDefault e
+    mDir <- dirFromHammerEvent e
+    for_ mDir $ \swipeDir -> do
+      consoleLogStr $ "SWIPE " ++ show swipeDir
+      runWith w $ setCurrentDir swipeDir
+{-  bindTouchControls w $ \case
+    DoubleTap -> Apecs.get global >>= \case
+      Title -> screenTransition Tutorial
+      Tutorial ->screenTransition Playing
+      Dead -> screenTransition Playing
+      Playing -> do
+        cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
+          playJfxr scrambleNoise
+          pure $ Scrambling 3
+    Swipe sv -> resolveCurrentDir (v2Dir 60 sv)
+-}
   bindKey w Playing ["Space"] $ do
     cmapM $ \(s::Snake, Not :: Not Scrambling) -> do
       playJfxr scrambleNoise
@@ -77,10 +99,55 @@ gateKeypress expectedCodes k e = do
     when (kcode `elem` expectedCodes) $ do
       k
 
+resolveCurrentDir :: [Dir] -> System World ()
+resolveCurrentDir dirs = cmap $ \(CurrentDir b) ->
+  let resolveConflicts = take 1 . sort
+      validDirs = case peekbufferLast b of
+        Nothing -> dirs
+        Just x -> filter (dirIsTurn x) dirs 
+  in case resolveConflicts validDirs of
+    [dir] -> CurrentDir (buffer dir b)
+    _ -> CurrentDir b
+
 setCurrentDir :: Dir -> System World ()
 setCurrentDir dir = cmap $ \(CurrentDir b) -> 
   CurrentDir (buffer dir b)
 
+data TouchInput =
+    DoubleTap
+  | Swipe (V2 Float)
+  deriving (Show)
+
+bindTouchControls :: World -> (TouchInput -> System World ()) -> IO ()
+bindTouchControls w f = do
+  let swipeThreshold = 5 -- px should this be smaller still?
+  let tapThreshold = 300 -- ms..todo make this a maybe?
+
+  startRef <- liftIO $ newIORef (V2 0 0)
+  lastTapRef <- liftIO $ newIORef 0
+
+  addDocumentEventListenerHs "touchstart" $ \e -> do
+    x <- liftIO $ pure . valAsFloat =<< getProperty "clientX" =<< getEventTouch e
+    y <- liftIO $ pure . valAsFloat =<< getProperty "clientY" =<< getEventTouch e
+    liftIO $ atomicWriteIORef startRef (V2 x y)
+
+  addDocumentEventListenerHs "touchend" $ \e -> do
+    endX <- liftIO $ pure . valAsFloat =<< getProperty "clientX" =<< getEventChangedTouch e
+    endY <- liftIO $ pure . valAsFloat =<< getProperty "clientY" =<< getEventChangedTouch e
+    startXY <- liftIO $ readIORef startRef
+
+    t <- liftIO $ valAsFloat <$> jsGetTime
+    lastTap <- readIORef lastTapRef
+    let tapLen = t - lastTap
+    liftIO $ writeIORef lastTapRef t
+    
+    let diffXY = V2 endX endY - startXY
+    if | norm diffXY > swipeThreshold -> 
+         runWith w (f $ Swipe diffXY)
+       | tapLen < tapThreshold ->
+         runWith w (f DoubleTap)
+       | otherwise -> pure()
+  
 bindTouchSwipe :: World -> (V2 Float -> System World ()) -> IO ()
 bindTouchSwipe w f = do
   startRef <- liftIO $ newIORef (V2 0 0)

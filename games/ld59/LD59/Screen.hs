@@ -51,7 +51,11 @@ screenInit = \case
   Title -> do
     onText @TitleText textVisible
     onText @PressStartText textVisible
-  Tutorial -> onText @TutorialText textVisible
+  Tutorial -> onText @TutorialText $ \txt -> do
+    textVisible txt
+    -- This doesn't seem necessary, but is best practice due to
+    -- HTMLText being rendered async
+    liftIO $ onViewUpdate txt
   Playing -> do
     updateScore (const (Score 0))
     onText @ScoreText textVisible

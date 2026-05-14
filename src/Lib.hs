@@ -16,6 +16,8 @@ import Data.String (IsString(..))
 import Data.Coerce
 
 import Pixi.Types qualified as Pixi
+import Hammer.Types qualified as Hammer
+
 -- | A JavaScript function represented as a JSVal.
 -- This type alias is used to represent callable JavaScript functions
 -- that can be passed between Haskell and JavaScript.
@@ -442,6 +444,9 @@ foreign import javascript unsafe "$2.on($1, $3)"
 addEventListener :: IsJSVal a => JSString -> a -> JSFunction -> IO ()
 addEventListener e o l = addEventListener' e (coerce o) l
 
+addEventListenerHs :: IsJSVal a => JSString -> a -> (JSVal -> IO ()) -> IO ()
+addEventListenerHs e o l = jsFuncFromHs_ l >>= addEventListener' e (coerce o)
+
 foreign import javascript unsafe "window.addEventListener($1, $2)"
   addWindowEventListener :: JSString -> JSFunction -> IO ()
 
@@ -464,3 +469,18 @@ foreign import javascript unsafe "new Date().getTime()"
 
 foreign import javascript unsafe "('ontouchstart' in window) || (navigator.maxTouchPoints > 0)"
   isTouchDevice :: IO Bool
+
+-----------
+-- Hammer.js
+
+foreign import javascript unsafe
+  """
+  const h = new Hammer($1, { touchAction: 'none'});
+  h.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+  h.get('pan').set({ direction: Hammer.DIRECTION_ALL, threshold: 20 });
+  return h;
+  """
+  newDefaultHammer :: JSVal -> IO Hammer.Manager
+
+foreign import javascript unsafe "$1.preventDefault()"
+  preventDefault :: JSVal -> IO ()

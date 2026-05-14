@@ -53,6 +53,7 @@ library
   default-language: GHC2021
   -- cabal-gild: discover src
   exposed-modules:
+    Hammer.Types
     Lib
     Pixi.Types
 

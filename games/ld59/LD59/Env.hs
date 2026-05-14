@@ -1,4 +1,5 @@
 {-# LANGUAGE ImplicitParams #-}
+{-# LANGUAGE StrictData #-}
 {-# LANGUAGE RecordWildCards #-}
 module LD59.Env where
 
@@ -8,12 +9,14 @@ import Pixi.Types qualified as Pixi
 import Control.Monad.IO.Class
 import Lib
 import Linear.V2
+import Hammer.Types qualified as Hammer
 
 data Env = Env
   { envArt :: Art
   , envAudio :: Jfxr.AudioContext
   , envApp :: Pixi.Application
   , envPlayArea :: Pixi.Container
+  , envHammer :: Hammer.Manager
   }
 
 type HasEnv = (?env :: Env)

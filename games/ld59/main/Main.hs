@@ -31,23 +31,23 @@ foreign export javascript "wasmMain" main :: IO ()
 
 main :: IO ()
 main = do
-  ac <- Jfxr.newAudioContext
+  envAudio <- Jfxr.newAudioContext
 
-  art <- newArt ac
+  envArt <- newArt envAudio
   -- Initialize PIXI application
-  app <- do
+  envApp <- do
     x <- newApp
     x' <- initAppSized x gameWidth gameHeight
     appendCanvas x'
     resizeAppToScreen x'
     pure x'
   initGameFonts
-  pa <- initPlayArea app
-  
-  withEnv (Env art ac app pa) $ do
+  envPlayArea <- initPlayArea envApp
+  envHammer <- getProperty "canvas" envApp >>= newDefaultHammer
+  withEnv Env{..} $ do
     setScalingNearestNeighbor
     --appendToTarget "#canvas-container" app
-    screen <- getProperty "screen" app
+    screen <- getProperty "screen" envApp
     screen_width <- valAsInt <$> getProperty "width" screen
     screen_height <- valAsInt <$> getProperty "height" screen
     
@@ -61,7 +61,8 @@ main = do
       initBorder
       initScoreText
       liftIO $ do
-        addChild app pa
+        -- foreground it
+        addChild envApp envPlayArea
       syncSnakeArt
       initTitleText
       initGameOverText

@@ -106,29 +106,50 @@ foreign import javascript unsafe
 
 foreign import javascript unsafe
   """
-  var msg = `
-  GOAL:
-  - Collect waves to grow your signal-chain.
-  - Match 3 waves to clear them from your signal-chain
-  - Don't collide with your signal-chain or the wall!
-
-  CONTROLS:
-  Keyboard:
-  - WASD or Arrow Keys to Change Direction
-  - Space to "Scramble"
-
-  Mobile:
-  - Swipe to Change Direction
-  - Two-finger Press to "Scramble"
-
-
-  `
   const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+  const tags = {
+    pink: { fill: 'hotpink' }
+  };
+  const scramble = '<pink>"Scramble"</pink>'
+  const goal = `
+GOAL:
+- Collect waves to grow your signal-chain.
+- Match 3 waves to clear them from your signal-chain
+- Don't collide with your signal-chain or the wall!
+- ${scramble} waves you don't want into new ones.
+`;
+  var controls;
   if (isMobile) {
-    msg += 'Double-tap to play';
+    controls = `
+CONTROLS:
+Mobile:
+- Swipe to Change Direction
+- Double-tap to ${scramble}
+`;
   } else {
-    msg += 'Press Enter to play';
+    controls = `
+CONTROLS:
+Keyboard:
+- WASD or Arrow Keys to Change Direction
+- Space to ${scramble}
+`;
   }
+
+  var start;
+  if (isMobile) {
+    start = 'Double-tap to play';
+  } else {
+    start = 'Press Enter to play';
+  }
+
+  const msg = `
+${goal}
+
+${controls}
+
+${start}
+`;
 
   const titleStyle = new PIXI.TextStyle({
     fontFamily: 'PressStart2P',
@@ -136,9 +157,10 @@ foreign import javascript unsafe
     fill: 'white',
     wordWrap: true,
     wordWrapWidth: 300,
-    align: 'left'
+    align: 'left',
+    tagStyles: tags
   });
-  const txt = new PIXI.Text({
+  const txt = new PIXI.HTMLText({
     text: msg,
     style: titleStyle
   });
@@ -146,6 +168,9 @@ foreign import javascript unsafe
   return txt;
   """
   newTutorialText :: IO Pixi.Text
+
+foreign import javascript unsafe "$1.onViewUpdate()"
+  onViewUpdate :: Pixi.Text -> IO ()
 
 textVisible :: MonadIO m => Pixi.Text -> m ()
 textVisible t = liftIO $ setProperty "visible" t (boolAsVal True)
