@@ -85,6 +85,7 @@ common ld59-shared
     base,
     bytestring,
     containers,
+    cute-c2,
     ease,
     extra,
     generic-lens,

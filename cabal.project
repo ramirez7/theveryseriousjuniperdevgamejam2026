@@ -8,3 +8,12 @@ source-repository-package
     location: https://gitlab.com/macaroni.dev/Ease.git
     tag: d28b7049fdc84b8807f1a2e7992c1275848ce254
     --sha256: sha256-2UbpA9U/RtSOX1WKMKrmPHyB6sIiGqhwoPTX1TC0O9c=
+
+source-repository-package
+    type: git
+    location: https://gitlab.com/macaroni.dev/cute-c2-hs.git
+    tag: 09218cb3f203a5d7ae223b3925ef592edb95376e
+    --sha256: sha256-iIXmj33rczlCWdH/KzXgryUSzXcO9TfFeUEWxHNcU+s=
+
+package: cute-c2
+    ghc-options: -XDuplicateRecordFields
