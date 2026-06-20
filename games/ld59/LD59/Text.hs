@@ -18,27 +18,6 @@ foreign import javascript safe
 
 foreign import javascript unsafe
   """
-  const gameStyle = new PIXI.TextStyle({
-    fontFamily: 'PressStart2P',
-    fontSize: 24,
-    fill: 'white',
-    wordWrap: true,
-    wordWrapWidth: 440,
-    lineHeight: 40,
-    align: 'center'
-  });
-
-  const txt = new PIXI.Text({
-    text: '',
-    style: gameStyle
-  });
-  txt.anchor.set(0.5);
-  return txt;
-  """
-  newScoreText :: IO Pixi.Text
-
-foreign import javascript unsafe
-  """
   const titleStyle = new PIXI.TextStyle({
     fontFamily: 'PressStart2P',
     fontSize: 36,
@@ -49,7 +28,7 @@ foreign import javascript unsafe
     align: 'center'
   });
   const txt = new PIXI.Text({
-    text: 'Digital Signal Puzzler',
+    text: 'Tornado Alley!',
     style: titleStyle
   });
   txt.anchor.set(0.5)
@@ -103,71 +82,6 @@ foreign import javascript unsafe
   return txt;
   """
   newPressStartText :: IO Pixi.Text
-
-foreign import javascript unsafe
-  """
-  const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-  const tags = {
-    pink: { fill: 'hotpink' }
-  };
-  const scramble = '<pink>"Scramble"</pink>'
-  const goal = `
-GOAL:
-- Collect waves to grow your signal-chain.
-- Match 3 waves to clear them from your signal-chain
-- Don't collide with your signal-chain or the wall!
-- ${scramble} waves you don't want into new ones.
-`;
-  var controls;
-  if (isMobile) {
-    controls = `
-CONTROLS:
-Mobile:
-- Swipe to Change Direction
-- Double-tap to ${scramble}
-`;
-  } else {
-    controls = `
-CONTROLS:
-Keyboard:
-- WASD or Arrow Keys to Change Direction
-- Space to ${scramble}
-`;
-  }
-
-  var start;
-  if (isMobile) {
-    start = 'Double-tap to play';
-  } else {
-    start = 'Press Enter to play';
-  }
-
-  const msg = `
-${goal}
-
-${controls}
-
-${start}
-`;
-
-  const titleStyle = new PIXI.TextStyle({
-    fontFamily: 'PressStart2P',
-    fontSize: 12,
-    fill: 'white',
-    wordWrap: true,
-    wordWrapWidth: 300,
-    align: 'left',
-    tagStyles: tags
-  });
-  const txt = new PIXI.HTMLText({
-    text: msg,
-    style: titleStyle
-  });
-  txt.anchor.set(0.5)
-  return txt;
-  """
-  newTutorialText :: IO Pixi.Text
 
 foreign import javascript unsafe "$1.onViewUpdate()"
   onViewUpdate :: Pixi.Text -> IO ()
