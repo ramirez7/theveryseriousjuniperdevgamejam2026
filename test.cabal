@@ -1,19 +1,19 @@
 cabal-version: 3.14
 name: test
 version: 0.3.0.0
-synopsis: Haskell wasm test
+synopsis: Haskell wasm gamedev
 -- A longer description of the package.
 description:
-  This is a test package for the Haskell wasm toolchain.
+  haskell web game
 
 -- The license under which the package is released.
 license: MIT
 -- The file containing the license text.
 license-file: LICENSE
 -- The package author(s).
-author: Matthias Pall Gissurarson
+author: Armando Ramirez
 -- An email address to which users can send suggestions, bug reports, and patches.
-maintainer: mpg@mpg.is
+maintainer: armando.m.ramirez@gmail.com
 -- A copyright notice.
 -- copyright:
 category: Development
@@ -57,26 +57,7 @@ library
     Lib
     Pixi.Types
 
-executable ld59-prep
-  import: warnings
-  hs-source-dirs: games/ld59-prep
-  main-is: Main.hs
-  default-language: GHC2021
-  ghc-options:
-    -no-hs-main
-    -optl-mexec-model=reactor
-    "-optl-Wl,--export=wasmMain"
-
-  -- cabal-gild: discover games/ld59-prep --exclude=games/ld59-prep/Main.hs
-  other-modules: PrepECS
-  build-depends:
-    apecs,
-    base,
-    ghc-experimental,
-    safe,
-    test
-
-common ld59-shared
+common mj626-shared
   import: warnings
   default-language: GHC2021
   build-depends:
@@ -97,38 +78,38 @@ common ld59-shared
     scientific,
     test
 
-library ld59-lib
-  import: ld59-shared
-  hs-source-dirs: games/ld59
-  -- cabal-gild: discover games/ld59 --exclude=games/ld59/Main.hs
+library mj626-lib
+  import: mj626-shared
+  hs-source-dirs: games/mj626
+  -- cabal-gild: discover games/mj626 --exclude=games/mj626/Main.hs
   exposed-modules:
-    LD59.Art
-    LD59.BGM
-    LD59.Buffer
-    LD59.Controls
-    LD59.Debug
-    LD59.Dir
-    LD59.Draw
-    LD59.Env
-    LD59.Init
-    LD59.Jfxr.JSFFI
-    LD59.Jfxr.Types
-    LD59.Main
-    LD59.Random
-    LD59.Rate
-    LD59.Screen
-    LD59.Sfx
-    LD59.Text
-    LD59.Tick
-    LD59.Wave
-    LD59.World
+    MJ626.Art
+    MJ626.BGM
+    MJ626.Buffer
+    MJ626.Controls
+    MJ626.Debug
+    MJ626.Dir
+    MJ626.Draw
+    MJ626.Env
+    MJ626.Init
+    MJ626.Jfxr.JSFFI
+    MJ626.Jfxr.Types
+    MJ626.Main
+    MJ626.Random
+    MJ626.Rate
+    MJ626.Screen
+    MJ626.Sfx
+    MJ626.Text
+    MJ626.Tick
+    MJ626.Wave
+    MJ626.World
 
-executable ld59
-  import: ld59-shared, wasm-export
-  hs-source-dirs: games/ld59/main
+executable mj626
+  import: mj626-shared, wasm-export
+  hs-source-dirs: games/mj626/main
   main-is: Main.hs
   build-depends:
-    test:ld59-lib
+    test:mj626-lib
 
 executable test
   -- Import common warning flags.
