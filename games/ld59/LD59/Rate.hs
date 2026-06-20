@@ -2,32 +2,14 @@
 module LD59.Rate where
 
 import Data.Word
-import LD59.World
 import Control.Monad (when)
 import Apecs
+import LD59.World
 
 data Rate = Rate
   { ratePeriod :: Word64
   , rateOffset :: Word64
   } deriving Show
-
-snakeRate :: Rate
-snakeRate = Rate 18 0
-
-tailAnimRate :: Rate
-tailAnimRate = Rate 10 0
-
-foodAnimRate :: Rate
-foodAnimRate = Rate 60 0
-
-scrambleAnimRate :: Rate
-scrambleAnimRate = Rate 5 0
-
-scrambleTickDegrees :: Int
-scrambleTickDegrees = 30
-
-spawnRate :: Rate
-spawnRate = Rate (3 * 60) 25
 
 everyFrameM :: System World Rate -> System World () -> System World ()
 everyFrameM mr f = mr >>= flip everyFrame f
