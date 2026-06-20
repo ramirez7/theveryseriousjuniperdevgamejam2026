@@ -114,6 +114,7 @@ library ld59-lib
     LD59.Jfxr.JSFFI
     LD59.Jfxr.Types
     LD59.Level
+    LD59.Main
     LD59.Random
     LD59.Rate
     LD59.Score
