@@ -28,21 +28,6 @@ waveToJfxr = \case
 playJfxr :: MonadIO m => HasEnv => JfxrDef -> m ()
 playJfxr = openEnv $ \Env{..} -> liftIO . (newClip >=> playClip envAudio)
 
-foodSfx :: HasEnv => Wave -> JfxrDef
-foodSfx w = withNote D 3 $ withWave w  baseSfx
-
-clearSfx :: HasEnv => Wave -> [JfxrDef]
-clearSfx w =
-  zipWith (uncurry withNote) [(D,4), (A,4), (D,5)] (replicate 3 (foodSfx w)) &
-    fmap (withDecay 0.25) &
-    fmap (withSustain 0.5)
-
-scrambleNoise :: HasEnv => JfxrDef
-scrambleNoise = openEnv $ \Env{..} ->
-  artSinJfxr envArt &
-    withWaveform "pinknoise" &
-    withDecay 1
-
 withNote :: Note -> Octave -> JfxrDef -> JfxrDef
 withNote n o d = d { jfxrFrequency = noteFreq n o }
 
