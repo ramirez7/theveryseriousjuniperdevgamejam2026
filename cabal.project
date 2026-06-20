@@ -12,8 +12,4 @@ source-repository-package
 source-repository-package
     type: git
     location: https://gitlab.com/macaroni.dev/cute-c2-hs.git
-    tag: 09218cb3f203a5d7ae223b3925ef592edb95376e
-    --sha256: sha256-iIXmj33rczlCWdH/KzXgryUSzXcO9TfFeUEWxHNcU+s=
-
-package: cute-c2
-    ghc-options: -XDuplicateRecordFields
+    tag: a7798f51bcb857d3bf47f8d2c05456d059b076ed

@@ -24,6 +24,7 @@ import LD59.Screen
 import LD59.Env
 import LD59.Art
 import LD59.Jfxr.JSFFI qualified as Jfxr
+import CuteC2
 
 -- Export the actual initialization function
 foreign export javascript "wasmMain" main :: IO ()
@@ -32,7 +33,8 @@ foreign export javascript "wasmMain" main :: IO ()
 main :: IO ()
 main = do
   envAudio <- Jfxr.newAudioContext
-
+  consoleLogShow (c2Collide (c2Circle (C2V 0 0) 2) (c2Circle (C2V 3 3) 5))
+  
   envArt <- newArt envAudio
   -- Initialize PIXI application
   envApp <- do
