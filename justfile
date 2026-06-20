@@ -1,11 +1,8 @@
 cabal-update:
     wasm32-wasi-cabal update
 
-repl exe:
-     wasm32-wasi-cabal repl exe:{{exe}}
-
-lib-repl libs="pixi-js jsffi-typed":
-    wasm32-wasi-cabal repl --enable-multi-repl {{libs}}
+repl target:
+     wasm32-wasi-cabal repl {{target}}
 
 all-repl:
     wasm32-wasi-cabal repl --enable-multi-repl all

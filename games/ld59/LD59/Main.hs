@@ -15,12 +15,11 @@ import Safe (maximumMay, minimumByMay)
 import Data.Foldable (for_)
 import LD59.Controls
 import LD59.Draw
-import LD59.Init
 import LD59.Tick
-import LD59.Snake
 import Linear.V2
 import LD59.Dir
 import LD59.Screen
+import LD59.Init
 import LD59.Env
 import LD59.Art
 import LD59.Jfxr.JSFFI qualified as Jfxr
@@ -59,29 +58,15 @@ main = do
 
     w <- initWorld
     runWith w $ do
-      initBG
-      initBorder
-      initScoreText
       liftIO $ do
         -- foreground it
         addChild envApp envPlayArea
-      syncSnakeArt
-      initTitleText
-      initGameOverText
-      initPressStartText
-      initTutorialText
       newEntity_ Title >> screenTransition Title
     
     callAddTicker gameTicker =<< jsFuncFromHs_
       (\_ -> runWith w $ do
-          gateScreen Playing $ do
-            tickFrame
-            tickSnake
-            tickFoodSpawn
-            animTail
-            animScramble
-            animFood
-            syncSnakeArt
+          tickFrame
+          pure ()
           )
     
     handleInput w

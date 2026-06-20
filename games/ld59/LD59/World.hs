@@ -9,53 +9,15 @@ module LD59.World where
 import Apecs
 import Data.Word (Word64)
 import Pixi.Types qualified as Pixi
-import LD59.Snake
 import LD59.Dir
 import Data.Monoid (Sum (..), First (..))
 import Linear.V2
-import LD59.Wave
 import LD59.Buffer
 import LD59.Jfxr.JSFFI (AudioBufferSourceNode)
 
-data Screen = Title | Tutorial | Playing | Dead deriving stock (Show, Eq)
+data Screen = Title deriving stock (Show, Eq)
 
 instance Component Screen where type Storage Screen = Unique Screen
-
-newtype BG = BG { bgSprite :: Maybe Pixi.Sprite }
-  deriving (Semigroup, Monoid) via (First Pixi.Sprite)
-
-instance Component BG where type Storage BG = Global BG
-
-newtype Border = Border { borderSprites :: [Pixi.Sprite] }
-  deriving (Semigroup, Monoid) via ([Pixi.Sprite])
-
-instance Component Border where type Storage Border = Global Border
-
-newtype CurrentDir = CurrentDir (Buffer 3 Dir) deriving stock (Show)
-instance Component CurrentDir where type Storage CurrentDir = Unique CurrentDir
-
-data Head = Head
-  { headSprite :: Pixi.Sprite
-  }
-
-data Tail = Tail
-  { tailSprite :: Pixi.Sprite
-  , tailWave :: Wave
-  }
-
-type Snake = SnakeF Head Tail
-data Food = Food
-  { foodStuff :: Tail
-  , foodPos :: V2 Int
-  }
-
-instance Component Food where type Storage Food = Map Food
-
-newtype Scrambling = Scrambling Word64
-  deriving stock (Show)
-  deriving newtype (Enum, Bounded, Num)
-
-instance Component Scrambling where type Storage Scrambling = Unique Scrambling
 
 newtype Frame = Frame Word64
   deriving stock (Eq, Ord, Show)
@@ -64,50 +26,15 @@ newtype Frame = Frame Word64
 
 instance Component Frame where type Storage Frame = Global Frame
 
-newtype Score = Score { rawScore :: Word64 }
-  deriving stock (Show)
-  deriving newtype (Enum, Bounded, Num)
-  deriving (Semigroup, Monoid) via (Sum Score)
-
-instance Component Score where type Storage Score = Global Score
-
 newtype BGM = BGM { bgmAudio :: Maybe AudioBufferSourceNode }
   deriving (Semigroup, Monoid) via (First AudioBufferSourceNode)
 instance Component BGM where type Storage BGM = Global BGM
 
 newtype UIText = UIText Pixi.Text
 instance Component UIText where type Storage UIText = Map UIText
-
-data ScoreText = ScoreText
-instance Component ScoreText where type Storage ScoreText = Unique ScoreText
-
-data TitleText = TitleText
-instance Component TitleText where type Storage TitleText = Unique TitleText
-
-data GameOverText = GameOverText
-instance Component GameOverText where type Storage GameOverText = Unique GameOverText
-
-data PressStartText = PressStartText
-instance Component PressStartText where type Storage PressStartText = Unique PressStartText
-
-data TutorialText = TutorialText
-instance Component TutorialText where type Storage TutorialText = Unique TutorialText
-
 makeWorld "World"
-  [ ''Snake
-  , ''CurrentDir
-  , ''Frame
+  [ ''Frame
   , ''Screen
-  , ''Food
-  , ''BG
-  , ''Border
-  , ''Score
-  , ''Scrambling
   , ''BGM
   , ''UIText
-  , ''TitleText
-  , ''ScoreText
-  , ''GameOverText
-  , ''PressStartText
-  , ''TutorialText
   ]
