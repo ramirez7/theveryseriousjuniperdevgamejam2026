@@ -86,8 +86,8 @@ library mj626-lib
     MJ626.Art
     MJ626.BGM
     MJ626.Buffer
+    MJ626.Camera
     MJ626.Controls
-    MJ626.Coords
     MJ626.Debug
     MJ626.Dir
     MJ626.Draw

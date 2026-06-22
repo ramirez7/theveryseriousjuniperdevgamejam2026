@@ -32,9 +32,19 @@ instance Component BGM where type Storage BGM = Global BGM
 
 newtype UIText = UIText Pixi.Text
 instance Component UIText where type Storage UIText = Map UIText
+
+data Camera = Camera
+  { cameraFocus :: V2 Float
+  , cameraWidth :: Float
+  , cameraHeight :: Float
+  }
+instance Component Camera where type Storage Camera = Unique Camera
+
+
 makeWorld "ECS"
   [ ''Frame
   , ''Scene
   , ''BGM
   , ''UIText
+  , ''Camera
   ]

@@ -15,12 +15,10 @@ import MJ626.Art
 import MJ626.Random
 import Apecs.Core
 
-initPlayArea :: Pixi.Application -> IO Pixi.Container
-initPlayArea app = do
+initCamera :: Pixi.Application -> IO Pixi.Container
+initCamera app = do
   c <- newContainer
   addChild app c
-  setProperty "x" c (intAsVal tileSize)
-  setProperty "y" c (intAsVal tileSize)
   pure c
 
 initText

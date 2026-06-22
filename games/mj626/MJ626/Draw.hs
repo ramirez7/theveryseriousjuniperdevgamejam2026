@@ -27,12 +27,11 @@ import MJ626.Dir
 import Control.Arrow (Kleisli (..))
 import MJ626.Buffer
 import Data.Maybe (fromMaybe)
-import MJ626.Coords
 
-setSpritePos :: Pixi.Sprite -> V2 Screen -> IO ()
+setSpritePos :: Pixi.Sprite -> V2 Float -> IO ()
 setSpritePos s (V2 x y) = do
-  setProperty "x" s (screenAsVal x)
-  setProperty "y" s (screenAsVal y)
+  setProperty "x" s (floatAsVal x)
+  setProperty "y" s (floatAsVal y)
 
 setSpritePosOffset :: Pixi.Sprite -> V2 Int -> V2 Float -> IO ()
 setSpritePosOffset s v2 offset = do

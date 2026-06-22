@@ -4,6 +4,7 @@
 module MJ626.Env where
 
 import MJ626.Art
+import MJ626.ECS
 import MJ626.Jfxr.JSFFI qualified as Jfxr
 import Pixi.Types qualified as Pixi
 import Control.Monad.IO.Class
@@ -15,8 +16,9 @@ data Env = Env
   { envArt :: Art
   , envAudio :: Jfxr.AudioContext
   , envApp :: Pixi.Application
-  , envPlayArea :: Pixi.Container
+  , envCamera :: Pixi.Container
   , envHammer :: Hammer.Manager
+  , envECS :: ECS
   }
 
 type HasEnv = (?env :: Env)
@@ -42,6 +44,6 @@ gameDims@(V2 gameWidth gameHeight) = V2 (tileWidth*tileSize) (tileHeight*tileSiz
 playAreaWidth, playAreaHeight :: Int
 (V2 playAreaWidth playAreaHeight) = gameDims - pure (tileSize*2)
 
-addPlayAreaChild :: MonadIO m => IsJSVal a => HasEnv => a -> m ()
-addPlayAreaChild x = openEnv $ \Env{..} -> liftIO $ addContainerChild envPlayArea x
+addCameraChild :: MonadIO m => IsJSVal a => HasEnv => a -> m ()
+addCameraChild x = openEnv $ \Env{..} -> liftIO $ addContainerChild envCamera x
 

@@ -19,6 +19,7 @@ import MJ626.Tick
 import Linear.V2
 import MJ626.Dir
 import MJ626.Scene
+import MJ626.Camera
 import MJ626.Init
 import MJ626.Env
 import MJ626.Art
@@ -43,8 +44,9 @@ main = do
     resizeAppToScreen x'
     pure x'
   initGameFonts
-  envPlayArea <- initPlayArea envApp
+  envCamera <- initCamera envApp
   envHammer <- getProperty "canvas" envApp >>= newDefaultHammer
+  envECS <- initECS
   withEnv Env{..} $ do
     setScalingNearestNeighbor
     --appendToTarget "#canvas-container" app
@@ -56,19 +58,35 @@ main = do
     setProperty "maxFPS" gameTicker (intAsVal 60)
     setProperty "minFPS" gameTicker (intAsVal 60)
 
-    w <- initECS
-    runWith w $ do
+
+    runWith envECS $ do
       liftIO $ do
         -- foreground it
-        addChild envApp envPlayArea
+        addChild envApp envCamera
       newEntity_ Title >> sceneTransition Title
-    
+      newEntity_ Camera
+        { cameraFocus = V2 0 0
+        , cameraHeight = fromIntegral gameHeight
+        , cameraWidth = fromIntegral gameWidth
+        }
+      liftIO $ do
+        bg <- baseTexture "WHITE" >>= newSprite
+        setProperty "width" bg (intAsVal gameWidth)
+        setProperty "height" bg (intAsVal gameHeight)
+        setProperty "x" bg (intAsVal 0)
+        setProperty "y" bg (intAsVal 0)
+        addCameraChild bg
+      testSprite <- liftIO $ newSprite (artTornadoTexture envArt)
+      liftIO $ addCameraChild testSprite
+      liftIO $ setSpritePos testSprite (V2 100 100)
+
     callAddTicker gameTicker =<< jsFuncFromHs_
-      (\_ -> runWith w $ do
+      (\_ -> runWith envECS $ do
           tickFrame
+          applyCamera
           pure ()
           )
-    
-    handleInput w
+
+    handleInput envECS
     startTicker gameTicker
     pure ()
