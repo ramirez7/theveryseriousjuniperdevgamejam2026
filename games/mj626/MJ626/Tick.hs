@@ -4,10 +4,10 @@
 module MJ626.Tick where
 
 import Apecs
-import MJ626.World
+import MJ626.ECS
 import Ease
 import MJ626.Art
-import MJ626.Screen
+import MJ626.Scene
 import GHC.Wasm.Prim
 import Control.Monad (when, guard)
 import Control.Lens
@@ -28,7 +28,7 @@ import Data.Tuple.Extra (uncurry3)
 import MJ626.Rate
 import MJ626.Sfx
 
-tickFrame :: System World ()
+tickFrame :: System ECS ()
 tickFrame = modify global (succ @Frame)
 
 worldBounds :: V2 Int

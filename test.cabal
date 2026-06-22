@@ -87,9 +87,11 @@ library mj626-lib
     MJ626.BGM
     MJ626.Buffer
     MJ626.Controls
+    MJ626.Coords
     MJ626.Debug
     MJ626.Dir
     MJ626.Draw
+    MJ626.ECS
     MJ626.Env
     MJ626.Init
     MJ626.Jfxr.JSFFI
@@ -97,12 +99,11 @@ library mj626-lib
     MJ626.Main
     MJ626.Random
     MJ626.Rate
-    MJ626.Screen
+    MJ626.Scene
     MJ626.Sfx
     MJ626.Text
     MJ626.Tick
     MJ626.Wave
-    MJ626.World
 
 executable mj626
   import: mj626-shared, wasm-export

@@ -7,7 +7,7 @@
 
 module MJ626.Controls where
 
-import MJ626.World
+import MJ626.ECS
 import MJ626.Buffer
 import MJ626.BGM
 import Data.List (sort)
@@ -21,7 +21,7 @@ import Control.Monad (unless, when)
 import Lib
 import Control.Monad.IO.Class
 import Data.Coerce
-import MJ626.Screen
+import MJ626.Scene
 import Pixi.Types qualified as Pixi
 import Hammer.Types qualified as Hammer
 import MJ626.Draw
@@ -31,13 +31,13 @@ import Data.IORef
 import Linear.V2
 import Linear (norm)
 
-handleInput :: HasEnv => World -> IO ()
+handleInput :: HasEnv => ECS -> IO ()
 handleInput w = openEnv $ \Env{..} -> do
   pure ()
 
-bindKey :: World -> Screen -> [String] -> System World () -> IO ()
-bindKey w screen keycodes sys =
-  addWindowEventListener "keydown" =<< jsFuncFromHs_ (runWith w . gateKeypress keycodes (gateScreen screen sys))
+bindKey :: ECS -> Scene -> [String] -> System ECS () -> IO ()
+bindKey w scene keycodes sys =
+  addWindowEventListener "keydown" =<< jsFuncFromHs_ (runWith w . gateKeypress keycodes (gateScene scene sys))
 
 gateKeypress :: MonadIO m => [String] -> m () -> JSVal -> m ()
 gateKeypress expectedCodes k e = do

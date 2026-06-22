@@ -9,7 +9,7 @@ import Lib
 import Ease
 import Control.Monad
 import Pixi.Types qualified as Pixi
-import MJ626.World
+import MJ626.ECS
 import MJ626.Rate
 import Data.Foldable
 import Apecs
@@ -27,9 +27,12 @@ import MJ626.Dir
 import Control.Arrow (Kleisli (..))
 import MJ626.Buffer
 import Data.Maybe (fromMaybe)
+import MJ626.Coords
 
-setSpritePos :: Pixi.Sprite -> V2 Int -> IO ()
-setSpritePos s p = setSpritePosOffset s p (V2 0 0)
+setSpritePos :: Pixi.Sprite -> V2 Screen -> IO ()
+setSpritePos s (V2 x y) = do
+  setProperty "x" s (screenAsVal x)
+  setProperty "y" s (screenAsVal y)
 
 setSpritePosOffset :: Pixi.Sprite -> V2 Int -> V2 Float -> IO ()
 setSpritePosOffset s v2 offset = do

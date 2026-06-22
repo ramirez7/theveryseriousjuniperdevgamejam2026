@@ -4,17 +4,17 @@ module MJ626.Rate where
 import Data.Word
 import Control.Monad (when)
 import Apecs
-import MJ626.World
+import MJ626.ECS
 
 data Rate = Rate
   { ratePeriod :: Word64
   , rateOffset :: Word64
   } deriving Show
 
-everyFrameM :: System World Rate -> System World () -> System World ()
+everyFrameM :: System ECS Rate -> System ECS () -> System ECS ()
 everyFrameM mr f = mr >>= flip everyFrame f
 
-everyFrame :: Rate -> System World () -> System World ()
+everyFrame :: Rate -> System ECS () -> System ECS ()
 everyFrame Rate{..} k = do
   Frame frame <- get global
   when (frame `mod` ratePeriod == rateOffset) k
@@ -26,7 +26,7 @@ rateTween (Frame f) Rate{..} =
   then rateTween (Frame $ f + ratePeriod) Rate{..}
   else fromIntegral ((f - rateOffset) `mod` ratePeriod) / fromIntegral ratePeriod
 
-rateTweenM :: Rate -> System World Float
+rateTweenM :: Rate -> System ECS Float
 rateTweenM r = fmap (flip rateTween r) (Apecs.get global)
 
 {-

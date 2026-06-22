@@ -5,7 +5,7 @@ module MJ626.Sfx where
 
 import MJ626.Env
 import MJ626.Art
-import MJ626.World
+import MJ626.ECS
 import Data.Function ((&))
 import MJ626.Jfxr.Types
 import MJ626.Jfxr.JSFFI

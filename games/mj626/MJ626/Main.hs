@@ -8,7 +8,7 @@ import Control.Monad (when)
 import GHC.Wasm.Prim
 import Pixi.Types qualified as Pixi
 import Apecs
-import MJ626.World
+import MJ626.ECS
 import MJ626.Text
 import Data.Function (on)
 import Safe (maximumMay, minimumByMay)
@@ -18,7 +18,7 @@ import MJ626.Draw
 import MJ626.Tick
 import Linear.V2
 import MJ626.Dir
-import MJ626.Screen
+import MJ626.Scene
 import MJ626.Init
 import MJ626.Env
 import MJ626.Art
@@ -56,12 +56,12 @@ main = do
     setProperty "maxFPS" gameTicker (intAsVal 60)
     setProperty "minFPS" gameTicker (intAsVal 60)
 
-    w <- initWorld
+    w <- initECS
     runWith w $ do
       liftIO $ do
         -- foreground it
         addChild envApp envPlayArea
-      newEntity_ Title >> screenTransition Title
+      newEntity_ Title >> sceneTransition Title
     
     callAddTicker gameTicker =<< jsFuncFromHs_
       (\_ -> runWith w $ do

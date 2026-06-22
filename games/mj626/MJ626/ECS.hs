@@ -4,7 +4,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE TypeFamilies #-}
-module MJ626.World where
+module MJ626.ECS where
 
 import Apecs
 import Data.Word (Word64)
@@ -15,9 +15,9 @@ import Linear.V2
 import MJ626.Buffer
 import MJ626.Jfxr.JSFFI (AudioBufferSourceNode)
 
-data Screen = Title deriving stock (Show, Eq)
+data Scene = Title deriving stock (Show, Eq)
 
-instance Component Screen where type Storage Screen = Unique Screen
+instance Component Scene where type Storage Scene = Unique Scene
 
 newtype Frame = Frame Word64
   deriving stock (Eq, Ord, Show)
@@ -32,9 +32,9 @@ instance Component BGM where type Storage BGM = Global BGM
 
 newtype UIText = UIText Pixi.Text
 instance Component UIText where type Storage UIText = Map UIText
-makeWorld "World"
+makeWorld "ECS"
   [ ''Frame
-  , ''Screen
+  , ''Scene
   , ''BGM
   , ''UIText
   ]

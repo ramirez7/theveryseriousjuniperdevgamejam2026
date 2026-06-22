@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module MJ626.Init where
 
-import MJ626.World
+import MJ626.ECS
 import MJ626.Dir
 import MJ626.Draw
 import MJ626.Text
@@ -24,13 +24,13 @@ initPlayArea app = do
   pure c
 
 initText
-  :: Has World IO tag
+  :: Has ECS IO tag
   => ExplSet IO (Storage tag)
   => HasEnv
   => tag
   -> IO Pixi.Text
   -> V2 Int
-  -> System World ()
+  -> System ECS ()
 initText tt mkText (V2 tx ty) = openEnv $ \Env{..} -> do
   txt <- liftIO mkText
   liftIO $ do
