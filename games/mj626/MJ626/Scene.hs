@@ -36,7 +36,8 @@ sceneTransition next = cmapM $ \(curr::Scene) -> do
 sceneCleanup :: HasEnv => Scene -> System ECS ()
 sceneCleanup = \case
   Title -> pure ()
-
+  _ -> pure ()
 sceneInit :: HasEnv => Scene -> System ECS ()
 sceneInit = \case
   Title -> pure ()
+  _ -> pure ()

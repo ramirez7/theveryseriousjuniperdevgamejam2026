@@ -14,6 +14,7 @@ import Data.Monoid (Sum (..), First (..))
 import Linear.V2
 import MJ626.Buffer
 import MJ626.Jfxr.JSFFI (AudioBufferSourceNode)
+import GHC.Generics
 
 data Scene =
     Title
@@ -46,9 +47,13 @@ data Camera = Camera
 instance Component Camera where type Storage Camera = Unique Camera
 
 data Tornado = Tornado
-  { tornadoSprite :: Pixi.Sprite
-  }
 instance Component Tornado where type Storage Tornado = Unique Tornado
+
+data TornadoGfxF a = TornadoGfx
+  { tornadoSprite :: a
+  }
+  deriving stock (Show, Eq, Ord, Generic, Generic1, Functor, Foldable, Traversable)
+  deriving Applicative via Generically1 TornadoGfxF
 
 data TornadoDir = TornadoDir HDir
 instance Component TornadoDir where type Storage TornadoDir = Unique TornadoDir

@@ -13,7 +13,7 @@ switchBGM scene = openEnv $ \Env{..} -> do
 
   let toPlay = case scene of
         Title -> Nothing
-
+        _ -> Nothing
   bgm <- liftIO $ traverse (Jfxr.loopAudioBuffer envAudio) toPlay
 
   Apecs.set global $ BGM bgm
