@@ -32,7 +32,7 @@ tickFrame :: System ECS ()
 tickFrame = modify global (succ @Frame)
 
 worldBounds :: V2 Int
-worldBounds = tileDims - pure 3 -- border + 1
+worldBounds = tileDims
 
 worldCoords :: [V2 Int]
 worldCoords = do

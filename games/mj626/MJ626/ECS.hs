@@ -15,7 +15,12 @@ import Linear.V2
 import MJ626.Buffer
 import MJ626.Jfxr.JSFFI (AudioBufferSourceNode)
 
-data Scene = Title deriving stock (Show, Eq)
+data Scene =
+    Title
+  | Bowling'Pre
+  | Bowling'Rolling
+  | Bowling'Pins
+  deriving stock (Show, Eq)
 
 instance Component Scene where type Storage Scene = Unique Scene
 
@@ -40,6 +45,25 @@ data Camera = Camera
   }
 instance Component Camera where type Storage Camera = Unique Camera
 
+data Tornado = Tornado
+  { tornadoSprite :: Pixi.Sprite
+  }
+instance Component Tornado where type Storage Tornado = Unique Tornado
+
+data TornadoDir = TornadoDir HDir
+instance Component TornadoDir where type Storage TornadoDir = Unique TornadoDir
+
+data Position = Position (V2 Float)
+instance Component Position where type Storage Position = Map Position
+
+data Velocity = Velocity (V2 Float)
+instance Component Velocity where type Storage Velocity = Map Velocity
+
+data Traction = Traction (V2 Float)
+instance Component Traction where type Storage Traction = Map Traction
+
+data Accel = Accel (V2 Float)
+instance Component Accel where type Storage Accel = Map Accel
 
 makeWorld "ECS"
   [ ''Frame
@@ -47,4 +71,8 @@ makeWorld "ECS"
   , ''BGM
   , ''UIText
   , ''Camera
+  , ''Tornado
+  , ''TornadoDir
+  , ''Position
+  , ''Velocity
   ]

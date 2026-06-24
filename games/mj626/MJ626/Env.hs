@@ -29,7 +29,6 @@ withEnv e k = let ?env = e in k
 openEnv :: HasEnv => (Env -> r) -> r
 openEnv k = k ?env
 
-
 tileSize :: Int
 tileSize = 32
 

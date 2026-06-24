@@ -9,6 +9,9 @@ import Linear (signorm)
 import Lib
 import GHC.Wasm.Prim
 
+data HDir = HLEFT | HRIGHT
+  deriving stock (Show, Eq, Ord, Enum, Bounded)
+
 data Dir = UP | DOWN | LEFT | RIGHT
   deriving stock (Show, Eq, Ord, Enum, Bounded)
 
