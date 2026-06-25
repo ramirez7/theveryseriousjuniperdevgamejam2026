@@ -27,6 +27,14 @@ import MJ626.Dir
 import Control.Arrow (Kleisli (..))
 import MJ626.Buffer
 import Data.Maybe (fromMaybe)
+import MJ626.PureSprite
+
+syncSpritePositions :: System ECS ()
+syncSpritePositions = do
+  cmapM_ $ \(ps@PureSprite{}, (Position pv)) ->
+    syncPureSprite (ps { psPosition = psPosition ps + pv })
+  cmapM_ $ \(tgfx@TornadoGfx{..}, (Position pv)) ->
+    for_ tgfx $ \ps -> syncPureSprite (ps { psPosition = psPosition ps + pv })
 
 setSpritePos :: Pixi.Sprite -> V2 Float -> IO ()
 setSpritePos s (V2 x y) = do

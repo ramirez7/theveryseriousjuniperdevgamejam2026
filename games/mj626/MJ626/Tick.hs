@@ -27,9 +27,13 @@ import MJ626.Env
 import Data.Tuple.Extra (uncurry3)
 import MJ626.Rate
 import MJ626.Sfx
+import MJ626.Physics
 
 tickFrame :: System ECS ()
 tickFrame = modify global (succ @Frame)
+
+tickPhysics :: System ECS ()
+tickPhysics = cmap $ uncurry4 applyPhysics
 
 worldBounds :: V2 Int
 worldBounds = tileDims
@@ -49,3 +53,6 @@ cfoldMap
   => (c -> a)
   -> SystemT w m a
 cfoldMap f = cfold (\acc c -> mappend acc (f c)) mempty
+
+uncurry4 :: (a -> b -> c -> d -> e) -> (a, b, c, d) -> e
+uncurry4 f (a, b, c, d) = f a b c d

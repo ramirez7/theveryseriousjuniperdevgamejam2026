@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -9,6 +10,7 @@ import Lib
 import Linear.V2
 import Control.Monad.IO.Class
 import GHC.Wasm.Prim
+import Apecs
 
 data PureSprite = PureSprite
   { psSprite :: Pixi.Sprite
@@ -17,6 +19,9 @@ data PureSprite = PureSprite
   , psPosition :: V2 Float
   , psAngle :: Float
   }
+
+instance Component PureSprite where
+  type Storage PureSprite = Map PureSprite
 
 mkPureSprite :: Pixi.Sprite -> PureSprite
 mkPureSprite psSprite = PureSprite

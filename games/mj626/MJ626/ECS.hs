@@ -12,7 +12,7 @@ import Pixi.Types qualified as Pixi
 import MJ626.Dir
 import Data.Monoid (Sum (..), First (..))
 import Linear.V2
-import MJ626.Buffer
+import MJ626.PureSprite
 import MJ626.Jfxr.JSFFI (AudioBufferSourceNode)
 import GHC.Generics
 
@@ -55,19 +55,32 @@ data TornadoGfxF a = TornadoGfx
   deriving stock (Show, Eq, Ord, Generic, Generic1, Functor, Foldable, Traversable)
   deriving Applicative via Generically1 TornadoGfxF
 
+instance Component (TornadoGfxF a) where type Storage (TornadoGfxF a) = Unique (TornadoGfxF a)
+
+type TornadoGfx = TornadoGfxF PureSprite
+
 data TornadoDir = TornadoDir HDir
 instance Component TornadoDir where type Storage TornadoDir = Unique TornadoDir
 
-data Position = Position (V2 Float)
+newtype Position = Position (V2 Float)
+  deriving stock (Show, Eq, Ord)
+  deriving newtype (Num)
+
 instance Component Position where type Storage Position = Map Position
 
-data Velocity = Velocity (V2 Float)
+newtype Velocity = Velocity (V2 Float)
+  deriving stock (Show, Eq, Ord)
+  deriving newtype (Num)
 instance Component Velocity where type Storage Velocity = Map Velocity
 
-data Traction = Traction (V2 Float)
+newtype Traction = Traction Float
+  deriving stock (Show, Eq, Ord)
+  deriving newtype (Num)
 instance Component Traction where type Storage Traction = Map Traction
 
-data Accel = Accel (V2 Float)
+newtype Accel = Accel (V2 Float)
+  deriving stock (Show, Eq, Ord)
+  deriving newtype (Num)
 instance Component Accel where type Storage Accel = Map Accel
 
 makeWorld "ECS"
@@ -80,4 +93,8 @@ makeWorld "ECS"
   , ''TornadoDir
   , ''Position
   , ''Velocity
+  , ''Traction
+  , ''Accel
+  , ''PureSprite
+  , ''TornadoGfx
   ]

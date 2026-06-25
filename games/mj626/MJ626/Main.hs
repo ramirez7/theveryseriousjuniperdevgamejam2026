@@ -82,7 +82,11 @@ main = do
 
     callAddTicker gameTicker =<< jsFuncFromHs_
       (\_ -> runWith envECS $ do
+          -- logic
           tickFrame
+          tickPhysics
+          -- gfx
+          syncSpritePositions
           applyCamera
           pure ()
           )
