@@ -85,6 +85,7 @@ main = do
           -- logic
           tickFrame
           tickPhysics
+          tickCamera
           -- gfx
           syncSpritePositions
           applyCamera

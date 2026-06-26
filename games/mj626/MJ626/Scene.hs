@@ -36,8 +36,12 @@ sceneTransition next = cmapM $ \(curr::Scene) -> do
 sceneCleanup :: HasEnv => Scene -> System ECS ()
 sceneCleanup = \case
   Title -> pure ()
+  Bowling'Rolling -> pure ()
   _ -> pure ()
+
 sceneInit :: HasEnv => Scene -> System ECS ()
 sceneInit = \case
   Title -> pure ()
+  Bowling'Pre -> pure ()
+  Bowling'Rolling -> pure ()
   _ -> pure ()

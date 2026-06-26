@@ -35,6 +35,10 @@ tickFrame = modify global (succ @Frame)
 tickPhysics :: System ECS ()
 tickPhysics = cmap $ uncurry4 applyPhysics
 
+tickCamera :: System ECS ()
+tickCamera = cmapM_ $ \(Tornado, Position p) ->
+  cmap $ \Camera{..} -> Camera{cameraFocus = p, ..}
+
 worldBounds :: V2 Int
 worldBounds = tileDims
 
