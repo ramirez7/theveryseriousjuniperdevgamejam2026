@@ -91,6 +91,6 @@ main = do
           pure ()
           )
 
-    handleInput envECS
+    handleInput
     startTicker gameTicker
     pure ()

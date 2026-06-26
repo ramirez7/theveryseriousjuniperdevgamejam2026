@@ -32,14 +32,14 @@ import Data.IORef
 import Linear.V2
 import Linear (norm)
 
-handleInput :: HasEnv => ECS -> IO ()
-handleInput w = openEnv $ \Env{..} -> do
-  bindKey w Bowling'Rolling ["Space"] $ do
+handleInput :: HasEnv => IO ()
+handleInput = openEnv $ \Env{..} -> do
+  bindKey Bowling'Rolling ["Space"] $ do
     cmap $ \(TornadoDir (flipHDir -> hd')) -> (TornadoDir hd', Velocity $ hdirV2 hd' + V2 0 1)
 
-bindKey :: ECS -> Scene -> [String] -> System ECS () -> IO ()
-bindKey w scene keycodes sys =
-  addWindowEventListener "keydown" =<< jsFuncFromHs_ (runWith w . gateKeypress keycodes (gateScene scene sys))
+bindKey :: HasEnv => Scene -> [String] -> System ECS () -> IO ()
+bindKey scene keycodes sys =
+  openEnv $ \Env{..} -> addWindowEventListener "keydown" =<< jsFuncFromHs_ (runWith envECS . gateKeypress keycodes (gateScene scene sys))
 
 gateKeypress :: MonadIO m => [String] -> m () -> JSVal -> m ()
 gateKeypress expectedCodes k e = do
