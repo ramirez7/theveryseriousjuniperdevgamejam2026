@@ -12,6 +12,16 @@ import GHC.Wasm.Prim
 data HDir = HLEFT | HRIGHT
   deriving stock (Show, Eq, Ord, Enum, Bounded)
 
+flipHDir :: HDir -> HDir
+flipHDir = \case
+  HLEFT -> HRIGHT
+  HRIGHT -> HLEFT
+
+hdirV2 :: Num a => HDir -> V2 a
+hdirV2 = \case
+  HLEFT -> V2 -1 0
+  HRIGHT -> V2 1 0
+
 data Dir = UP | DOWN | LEFT | RIGHT
   deriving stock (Show, Eq, Ord, Enum, Bounded)
 

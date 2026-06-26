@@ -1,4 +1,5 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -33,7 +34,8 @@ import Linear (norm)
 
 handleInput :: HasEnv => ECS -> IO ()
 handleInput w = openEnv $ \Env{..} -> do
-  pure ()
+  bindKey w Bowling'Rolling ["Space"] $ do
+    cmap $ \(TornadoDir (flipHDir -> hd')) -> (TornadoDir hd', Velocity $ hdirV2 hd' + V2 0 1)
 
 bindKey :: ECS -> Scene -> [String] -> System ECS () -> IO ()
 bindKey w scene keycodes sys =
